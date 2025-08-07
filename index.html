@@ -8,16 +8,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Inter', sans-serif; padding-bottom: 80px; } /* Espaço para o menu inferior */
         .hidden { display: none; }
         .category-btn-active { background-color: #3b82f6; color: white; }
         .category-btn { background-color: #e5e7eb; color: #4b5563; }
         html.dark .category-btn { background-color: #374151; color: #d1d5db; }
         html.dark .category-btn-active { background-color: #3b82f6; color: white; }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
+        .nav-btn-active { color: #3b82f6; }
+        html.dark .nav-btn-active { color: #60a5fa; }
     </style>
     <script>
-        // Lógica do Modo Escuro/Claro
         if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
           document.documentElement.classList.add('dark')
         } else {
@@ -36,112 +37,67 @@
         <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <!-- Logótipo de Foguete SVG -->
-                    <svg class="h-10 w-10 text-blue-600 dark:text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9.17117 14.8288L14.8288 9.17117C15.5794 8.42059 16.513 7.53015 16.9322 7.0678C18.6836 5.14984 21.3435 3.32171 21.948 3.05201C22.5525 2.78231 23.218 3.44754 22.948 4.05201C22.6783 4.65648 20.8502 7.31641 18.9322 9.0678L18.4699 9.48697C17.4698 10.487 16.5126 11.4979 15.1712 12.8288L12.8288 15.1712C11.4979 16.5126 10.487 17.4698 9.48697 18.4699L9.0678 18.9322C7.31641 20.8502 4.65648 22.6783 4.05201 22.948C3.44754 23.218 2.78231 22.5525 3.05201 21.948C3.32171 21.3435 5.14984 18.6836 7.0678 16.9322C7.53015 16.513 8.42059 15.5794 9.17117 14.8288Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        <path d="M12 12L2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg class="h-10 w-10 text-blue-600 dark:text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.17117 14.8288L14.8288 9.17117C15.5794 8.42059 16.513 7.53015 16.9322 7.0678C18.6836 5.14984 21.3435 3.32171 21.948 3.05201C22.5525 2.78231 23.218 3.44754 22.948 4.05201C22.6783 4.65648 20.8502 7.31641 18.9322 9.0678L18.4699 9.48697C17.4698 10.487 16.5126 11.4979 15.1712 12.8288L12.8288 15.1712C11.4979 16.5126 10.487 17.4698 9.48697 18.4699L9.0678 18.9322C7.31641 20.8502 4.65648 22.6783 4.05201 22.948C3.44754 23.218 2.78231 22.5525 3.05201 21.948C3.32171 21.3435 5.14984 18.6836 7.0678 16.9322C7.53015 16.513 8.42059 15.5794 9.17117 14.8288Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12L2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">SI Delivery</h1>
                 </div>
-                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-                    <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
-                </button>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i id="theme-icon" class="fa-solid fa-moon text-xl"></i></button>
             </div>
         </header>
 
-        <main class="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Coluna de Produtos -->
-            <div class="lg:col-span-2">
-                <!-- Banner Promocional -->
-                <div class="relative bg-blue-600 text-white rounded-xl overflow-hidden mb-8 p-8 flex items-center min-h-[200px]">
-                    <div class="absolute inset-0 bg-black bg-opacity-30"></div>
-                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f81?q=80&w=2448&auto=format&fit=crop" class="absolute h-full w-full object-cover" alt="Banner de promoção">
-                    <div class="relative z-10">
-                        <h2 class="text-4xl font-extrabold drop-shadow-lg">BEBIDAS GELADAS</h2>
-                        <p class="mt-2 text-lg drop-shadow-md">A entrega mais rápida da cidade!</p>
+        <main class="container mx-auto">
+            <!-- Tela de Início -->
+            <div id="home-view" class="view p-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="relative bg-blue-600 text-white rounded-xl overflow-hidden mb-8 p-8 flex items-center min-h-[200px]"><div class="absolute inset-0 bg-black bg-opacity-30"></div><img src="https://images.unsplash.com/photo-1551024709-8f23befc6f81?q=80&w=2448&auto=format&fit=crop" class="absolute h-full w-full object-cover" alt="Banner de promoção"><div class="relative z-10"><h2 class="text-4xl font-extrabold drop-shadow-lg">BEBIDAS GELADAS</h2><p class="mt-2 text-lg drop-shadow-md">A entrega mais rápida da cidade!</p></div></div>
+                        <h2 class="text-2xl font-bold mb-4">Nosso Cardápio</h2>
+                        <div id="categories-nav" class="flex flex-wrap gap-2 mb-6"></div>
+                        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+                        <div id="upsell-section" class="mt-12"><h2 class="text-2xl font-bold mb-4">Para Acompanhar</h2><div id="upsell-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div></div>
                     </div>
-                </div>
-
-                <h2 class="text-2xl font-bold mb-4">Nosso Cardápio</h2>
-                <div id="categories-nav" class="flex flex-wrap gap-2 mb-6">
-                    <!-- Botões de categoria serão inseridos aqui -->
-                </div>
-                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                    <p>Aguardando produtos...</p>
-                </div>
-
-                <!-- Secção de Upsell -->
-                <div id="upsell-section" class="mt-12">
-                     <h2 class="text-2xl font-bold mb-4">Para Acompanhar</h2>
-                     <div id="upsell-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                        <!-- Produtos de Upsell -->
-                     </div>
+                    <div class="lg:col-span-1">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md sticky top-24">
+                            <h2 class="text-2xl font-bold mb-4">O seu Pedido</h2>
+                            <div id="cart-items" class="space-y-4 mb-4 max-h-60 overflow-y-auto"><p class="text-gray-500 dark:text-gray-400">O seu carrinho está vazio.</p></div>
+                            <div class="border-t dark:border-gray-700 pt-4"><div class="flex justify-between items-center text-gray-600 dark:text-gray-300"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div><div class="flex justify-between items-center text-sm text-green-600"><span>Desconto</span><span id="cart-discount">- R$ 0,00</span></div><div class="flex justify-between items-center font-bold text-lg mt-2"><span>Total</span><span id="cart-total">R$ 0,00</span></div></div>
+                            <div class="mt-4"><form id="coupon-form" class="flex gap-2"><input type="text" id="coupon-code" placeholder="Código do Cupom" class="w-full p-2 border dark:border-gray-600 rounded uppercase bg-gray-100 dark:bg-gray-700"><button type="submit" class="bg-gray-800 dark:bg-gray-600 text-white px-4 rounded hover:bg-gray-900 dark:hover:bg-gray-500">Aplicar</button></form><p id="coupon-message" class="text-sm mt-2"></p></div>
+                            <hr class="my-6 dark:border-gray-700">
+                            <div><h3 class="text-lg font-bold mb-4">Informações para Entrega</h3><form id="checkout-form" class="space-y-4"><input type="text" id="customer-name" placeholder="O seu Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><input type="text" id="customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><textarea id="order-instructions" placeholder="Instruções (ex: troco para 50)" class="w-full p-2 border dark:border-gray-600 rounded h-20 bg-gray-100 dark:bg-gray-700"></textarea><h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3><div class="flex gap-4"><button type="button" data-payment="delivery" class="payment-btn flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Pagar na Entrega</button><button type="button" data-payment="online" class="payment-btn flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg">Pagar Online</button></div></form></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Coluna do Pedido -->
-            <div class="lg:col-span-1">
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md sticky top-24">
-                    <h2 class="text-2xl font-bold mb-4">O seu Pedido</h2>
-                    <div id="cart-items" class="space-y-4 mb-4 max-h-60 overflow-y-auto">
-                        <p class="text-gray-500 dark:text-gray-400">O seu carrinho está vazio.</p>
-                    </div>
-                    
-                    <div class="border-t dark:border-gray-700 pt-4">
-                        <div class="flex justify-between items-center text-gray-600 dark:text-gray-300">
-                            <span>Subtotal</span>
-                            <span id="cart-subtotal">R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between items-center text-sm text-green-600">
-                            <span>Desconto</span>
-                            <span id="cart-discount">- R$ 0,00</span>
-                        </div>
-                        <div class="flex justify-between items-center font-bold text-lg mt-2">
-                            <span>Total</span>
-                            <span id="cart-total">R$ 0,00</span>
-                        </div>
-                    </div>
+            <!-- Tela Peça de Novo -->
+            <div id="reorder-view" class="view hidden p-6">
+                <h2 class="text-2xl font-bold mb-4">Peça de Novo</h2>
+                <p class="text-gray-600 dark:text-gray-400 mb-6">Clique nos itens dos seus pedidos antigos para adicionar ao carrinho atual.</p>
+                <div id="reorder-items-list" class="space-y-4"></div>
+            </div>
 
-                    <div class="mt-4">
-                         <form id="coupon-form" class="flex gap-2">
-                            <input type="text" id="coupon-code" placeholder="Código do Cupom" class="w-full p-2 border dark:border-gray-600 rounded uppercase bg-gray-100 dark:bg-gray-700">
-                            <button type="submit" class="bg-gray-800 dark:bg-gray-600 text-white px-4 rounded hover:bg-gray-900 dark:hover:bg-gray-500">Aplicar</button>
-                        </form>
-                        <p id="coupon-message" class="text-sm mt-2"></p>
-                    </div>
-
-                    <hr class="my-6 dark:border-gray-700">
-
-                    <div>
-                        <h3 class="text-lg font-bold mb-4">Informações para Entrega</h3>
-                        <form id="checkout-form" class="space-y-4">
-                            <input type="text" id="customer-name" placeholder="O seu Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
-                            <input type="text" id="customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
-                            <textarea id="order-instructions" placeholder="Instruções (ex: troco para 50)" class="w-full p-2 border dark:border-gray-600 rounded h-20 bg-gray-100 dark:bg-gray-700"></textarea>
-                            
-                            <h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3>
-                            <div class="flex gap-4">
-                                <button type="button" data-payment="delivery" class="payment-btn flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Pagar na Entrega</button>
-                                <button type="button" data-payment="online" class="payment-btn flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg">Pagar Online</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+            <!-- Tela Meus Pedidos -->
+            <div id="my-orders-view" class="view hidden p-6">
+                <h2 class="text-2xl font-bold mb-4">Meus Pedidos</h2>
+                <div id="my-orders-list" class="space-y-4"></div>
             </div>
         </main>
+
+        <!-- Menu de Navegação Inferior -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg border-t dark:border-gray-700 flex justify-around">
+            <button class="nav-btn nav-btn-active flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="home-view">
+                <i class="fa-solid fa-house text-xl"></i><span class="text-xs font-medium">Início</span>
+            </button>
+            <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="reorder-view">
+                <i class="fa-solid fa-repeat text-xl"></i><span class="text-xs font-medium">Peça de Novo</span>
+            </button>
+            <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="my-orders-view">
+                <i class="fa-solid fa-receipt text-xl"></i><span class="text-xs font-medium">Meus Pedidos</span>
+            </button>
+        </nav>
     </div>
     
     <!-- Modal de Sucesso -->
-    <div id="success-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm m-4 text-center p-8">
-            <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-                <i class="fa-solid fa-check fa-2x text-green-600"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2">Pedido Recebido!</h3>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">O seu pedido foi enviado com sucesso.</p>
-            <button id="close-success-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Fechar</button>
-        </div>
-    </div>
+    <div id="success-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50"><div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm m-4 text-center p-8"><div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4"><i class="fa-solid fa-check fa-2x text-green-600"></i></div><h3 class="text-xl font-bold mb-2">Pedido Recebido!</h3><p class="text-gray-600 dark:text-gray-300 mb-6">O seu pedido foi enviado com sucesso.</p><button id="close-success-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Fechar</button></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -166,6 +122,10 @@
             const closeSuccessBtn = document.getElementById('close-success-btn');
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = document.getElementById('theme-icon');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const views = document.querySelectorAll('.view');
+            const reorderItemsList = document.getElementById('reorder-items-list');
+            const myOrdersList = document.getElementById('my-orders-list');
 
             // --- CONFIGURAÇÃO DO FIREBASE ---
             const firebaseConfig = {
@@ -181,6 +141,7 @@
             let allProducts = [];
             let cart = [];
             let appliedCoupon = null;
+            let orderListeners = []; // Para gerir listeners de status
 
             // --- INICIALIZAÇÃO ---
             try {
@@ -204,7 +165,6 @@
                     updateThemeIcon();
                 });
                 updateThemeIcon();
-
 
                 // --- FUNÇÕES DE RENDERIZAÇÃO ---
                 const createProductCard = (product) => `
@@ -346,7 +306,123 @@
                     renderCart();
                 });
 
-                // --- LISTENERS ---
+                // --- LÓGICA DAS NOVAS GUIAS ---
+                const getOrderHistory = () => JSON.parse(localStorage.getItem('si_delivery_orders')) || [];
+                const saveOrderToHistory = (orderId) => {
+                    const history = getOrderHistory();
+                    if (!history.includes(orderId)) {
+                        history.push(orderId);
+                        localStorage.setItem('si_delivery_orders', JSON.stringify(history));
+                    }
+                };
+
+                const renderReorderItems = async () => {
+                    const orderIds = getOrderHistory();
+                    if (orderIds.length === 0) {
+                        reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
+                        return;
+                    }
+
+                    reorderItemsList.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>';
+                    const uniqueItems = {};
+                    for (const orderId of orderIds.reverse()) { // Pega dos mais recentes
+                        const orderSnap = await getDoc(doc(db, "orders", orderId));
+                        if (orderSnap.exists()) {
+                            orderSnap.data().items.forEach(item => {
+                                if (!uniqueItems[item.id]) {
+                                    uniqueItems[item.id] = item;
+                                }
+                            });
+                        }
+                    }
+                    
+                    const itemsArray = Object.values(uniqueItems);
+                    if (itemsArray.length === 0) {
+                         reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Não foi possível carregar os itens dos seus pedidos anteriores.</p>';
+                         return;
+                    }
+
+                    reorderItemsList.innerHTML = itemsArray.map(item => `
+                        <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold">${item.name}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+                            </div>
+                            <button class="reorder-add-btn bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 font-semibold px-4 py-2 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-800" data-id="${item.id}">Adicionar</button>
+                        </div>
+                    `).join('');
+                    
+                    document.querySelectorAll('.reorder-add-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            addToCart(btn.dataset.id);
+                            btn.textContent = 'Adicionado!';
+                            btn.classList.add('bg-green-200');
+                            setTimeout(() => {
+                                btn.textContent = 'Adicionar';
+                                btn.classList.remove('bg-green-200');
+                            }, 1000);
+                        });
+                    });
+                };
+
+                const renderMyOrders = () => {
+                    // Limpa listeners antigos para evitar duplicação
+                    orderListeners.forEach(unsubscribe => unsubscribe());
+                    orderListeners = [];
+
+                    const orderIds = getOrderHistory();
+                    if (orderIds.length === 0) {
+                        myOrdersList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
+                        return;
+                    }
+
+                    myOrdersList.innerHTML = ''; // Limpa a lista para reconstruir
+                    orderIds.reverse().forEach(orderId => {
+                        const orderCard = document.createElement('div');
+                        orderCard.id = `order-${orderId}`;
+                        orderCard.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md';
+                        orderCard.innerHTML = '<p>A carregar pedido...</p>';
+                        myOrdersList.appendChild(orderCard);
+
+                        const unsubscribe = onSnapshot(doc(db, "orders", orderId), (docSnap) => {
+                            if (docSnap.exists()) {
+                                const order = docSnap.data();
+                                const statusMap = {
+                                    pending: { text: 'Pendente', color: 'bg-yellow-500' },
+                                    in_preparation: { text: 'Em Preparo', color: 'bg-blue-500' },
+                                    out_for_delivery: { text: 'Saiu para Entrega', color: 'bg-purple-500' },
+                                    completed: { text: 'Concluído', color: 'bg-green-500' },
+                                    canceled: { text: 'Cancelado', color: 'bg-red-500' },
+                                };
+                                const currentStatus = statusMap[order.status] || { text: order.status, color: 'bg-gray-500' };
+
+                                orderCard.innerHTML = `
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-bold">Pedido #${docSnap.id.substring(0, 6)}</p>
+                                            <p class="text-sm text-gray-500 dark:text-gray-400">${new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR')}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p>
+                                            <span class="text-xs font-bold text-white px-2 py-1 rounded-full ${currentStatus.color}">${currentStatus.text}</span>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 border-t dark:border-gray-700 pt-2">
+                                        <ul class="text-sm">
+                                            ${order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}
+                                        </ul>
+                                    </div>
+                                `;
+                            } else {
+                                orderCard.innerHTML = `<p class="text-red-500">Pedido #${orderId.substring(0,6)} não encontrado.</p>`;
+                            }
+                        });
+                        orderListeners.push(unsubscribe);
+                    });
+                };
+
+
+                // --- LISTENERS GLOBAIS ---
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         onSnapshot(collection(db, "products"), (snapshot) => {
@@ -356,14 +432,12 @@
                             appLoader.classList.add('hidden');
                             appContent.classList.remove('hidden');
                         }, (error) => {
-                            console.error("Erro ao obter produtos:", error);
                             appLoader.innerHTML = `<p class="text-red-500">Não foi possível carregar os produtos.</p>`;
                         });
                     }
                 });
 
                 signInAnonymously(auth).catch((error) => {
-                    console.error("Falha no login anónimo:", error);
                     appLoader.innerHTML = `<p class="text-red-500">Erro ao conectar com o servidor.</p>`;
                 });
 
@@ -399,8 +473,7 @@
                             return;
                         }
                         
-                        const isFormValid = checkoutForm.checkValidity();
-                        if (!isFormValid) {
+                        if (!checkoutForm.checkValidity()) {
                             checkoutForm.reportValidity();
                             return;
                         }
@@ -428,7 +501,9 @@
                         };
 
                         try {
-                            await addDoc(collection(db, "orders"), orderData);
+                            const docRef = await addDoc(collection(db, "orders"), orderData);
+                            saveOrderToHistory(docRef.id); // Salva o ID do pedido no histórico
+                            
                             checkoutForm.reset();
                             couponForm.reset();
                             cart = [];
@@ -438,7 +513,6 @@
                             successModal.classList.remove('hidden');
                             successModal.classList.add('flex');
                         } catch (error) {
-                            console.error("Erro ao enviar pedido: ", error);
                             alert("Ocorreu um erro ao enviar o seu pedido.");
                         }
                     });
@@ -447,6 +521,23 @@
                 closeSuccessBtn.addEventListener('click', () => {
                     successModal.classList.add('hidden');
                     successModal.classList.remove('flex');
+                });
+
+                // Navegação principal
+                navButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const targetViewId = button.dataset.view;
+                        
+                        views.forEach(view => {
+                            view.id === targetViewId ? view.classList.remove('hidden') : view.classList.add('hidden');
+                        });
+
+                        navButtons.forEach(btn => btn.classList.remove('nav-btn-active'));
+                        button.classList.add('nav-btn-active');
+
+                        if (targetViewId === 'reorder-view') renderReorderItems();
+                        if (targetViewId === 'my-orders-view') renderMyOrders();
+                    });
                 });
 
             } catch (e) {
