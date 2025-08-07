@@ -136,7 +136,7 @@
                 listenToProducts();
                 listenToCoupons();
             } else {
-                 try {
+                try {
                     await signInAnonymously(auth);
                 } catch (error) {
                     console.error("Admin auth error:", error);
@@ -218,11 +218,7 @@
 
         window.updateOrderStatus = async (orderId, newStatus) => {
             const orderRef = doc(db, "orders", orderId);
-            try {
-                await updateDoc(orderRef, { status: newStatus });
-            } catch (error) {
-                console.error("Error updating order status: ", error);
-            }
+            await updateDoc(orderRef, { status: newStatus });
         };
 
         const productForm = document.getElementById('product-form');
@@ -237,18 +233,12 @@
                 category: document.getElementById('product-category').value,
                 imageUrl: document.getElementById('product-image-url').value,
             };
-
-            try {
-                if (id) {
-                    const productRef = doc(db, "products", id);
-                    await updateDoc(productRef, productData);
-                } else {
-                    await addDoc(productsCollection, productData);
-                }
-                resetForm();
-            } catch (error) {
-                console.error("Error saving product: ", error);
+            if (id) {
+                await updateDoc(doc(db, "products", id), productData);
+            } else {
+                await addDoc(productsCollection, productData);
             }
+            resetForm();
         });
 
         cancelEditBtn.addEventListener('click', resetForm);
@@ -302,12 +292,7 @@
 
         async function deleteProduct(id, name) {
             if (confirm(`Tem certeza que deseja excluir o produto "${name}"?`)) {
-                try {
-                    const productRef = doc(db, "products", id);
-                    await deleteDoc(productRef);
-                } catch (error) {
-                    console.error("Error deleting product: ", error);
-                }
+                await deleteDoc(doc(db, "products", id));
             }
         }
 
@@ -320,9 +305,7 @@
                 active: true
             };
             if (!code || !couponData.value) return;
-            
-            const couponRef = doc(db, "coupons", code);
-            await setDoc(couponRef, couponData);
+            await setDoc(doc(db, "coupons", code), couponData);
             document.getElementById('coupon-form').reset();
         });
 
@@ -353,8 +336,7 @@
 
         async function deleteCoupon(id) {
             if (confirm(`Tem certeza que deseja excluir o cupom "${id}"?`)) {
-                const couponRef = doc(db, "coupons", id);
-                await deleteDoc(couponRef);
+                await deleteDoc(doc(db, "coupons", id));
             }
         }
     </script>
