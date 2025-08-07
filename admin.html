@@ -25,8 +25,14 @@
 </head>
 <body class="text-gray-800">
 
+    <!-- Tela de Carregamento Inicial -->
+    <div id="app-loader" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+        <i class="fa-solid fa-spinner fa-spin fa-3x text-blue-500"></i>
+        <p class="mt-4 text-lg text-gray-600">Carregando painel...</p>
+    </div>
+
     <!-- Tela de Login -->
-    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div id="login-screen" class="hidden items-center justify-center min-h-screen bg-gray-100">
         <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-lg">
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Painel de Admin</h2>
             <p class="text-center text-gray-500 mb-6">Acesso restrito.</p>
@@ -143,9 +149,24 @@
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Adicionado listener para garantir que o DOM esteja pronto
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
             console.log("DOM carregado. Iniciando script do painel de admin.");
+
+            // --- ELEMENTOS DO DOM ---
+            const appLoader = document.getElementById('app-loader');
+            const loginScreen = document.getElementById('login-screen');
+            const adminPanel = document.getElementById('admin-panel');
+            const loginForm = document.getElementById('login-form');
+            const loginError = document.getElementById('login-error');
+            const logoutBtn = document.getElementById('logout-btn');
+            const productsListEl = document.getElementById('products-list');
+            const ordersListEl = document.getElementById('orders-list');
+            const productModal = document.getElementById('product-modal');
+            const productForm = document.getElementById('product-form');
+            const cancelProductBtn = document.getElementById('cancel-product-btn');
+            const addProductBtn = document.getElementById('add-product-btn');
+            const modalTitle = document.getElementById('modal-title');
+            const newOrderBadge = document.getElementById('new-order-badge');
 
             // --- CONFIGURAÇÃO DO FIREBASE ---
             const firebaseConfig = {
@@ -163,21 +184,6 @@
                 const db = getFirestore(app);
                 const auth = getAuth(app);
                 console.log("Firebase inicializado com sucesso.");
-
-                // --- ELEMENTOS DO DOM ---
-                const loginScreen = document.getElementById('login-screen');
-                const adminPanel = document.getElementById('admin-panel');
-                const loginForm = document.getElementById('login-form');
-                const loginError = document.getElementById('login-error');
-                const logoutBtn = document.getElementById('logout-btn');
-                const productsListEl = document.getElementById('products-list');
-                const ordersListEl = document.getElementById('orders-list');
-                const productModal = document.getElementById('product-modal');
-                const productForm = document.getElementById('product-form');
-                const cancelProductBtn = document.getElementById('cancel-product-btn');
-                const addProductBtn = document.getElementById('add-product-btn');
-                const modalTitle = document.getElementById('modal-title');
-                const newOrderBadge = document.getElementById('new-order-badge');
                 
                 // --- NAVEGAÇÃO POR ABAS ---
                 const tabButtons = document.querySelectorAll('.tab-btn');
@@ -201,16 +207,19 @@
 
                 // --- AUTENTICAÇÃO ---
                 onAuthStateChanged(auth, user => {
+                    appLoader.classList.add('hidden'); // Esconde o loader principal
                     try {
                         if (user) {
                             console.log("Usuário autenticado:", user.uid);
                             loginScreen.classList.add('hidden');
+                            loginScreen.classList.remove('flex');
                             adminPanel.classList.remove('hidden');
                             initListeners();
                         } else {
-                            console.log("Nenhum usuário autenticado.");
-                            loginScreen.classList.remove('hidden');
+                            console.log("Nenhum usuário autenticado. Exibindo tela de login.");
                             adminPanel.classList.add('hidden');
+                            loginScreen.classList.remove('hidden');
+                            loginScreen.classList.add('flex');
                         }
                     } catch (e) {
                         console.error("Erro no onAuthStateChanged:", e);
@@ -434,7 +443,10 @@
 
             } catch (e) {
                 console.error("Erro fatal na inicialização do Firebase:", e);
-                document.body.innerHTML = `<div class="p-4 bg-red-100 text-red-800">Erro crítico na configuração do Firebase. Verifique o console.</div>`;
+                appLoader.innerHTML = `<div class="p-4 bg-red-100 text-red-800 text-center">
+                    <p class="font-bold">Erro crítico na configuração do Firebase.</p>
+                    <p class="text-sm">Verifique o console para mais detalhes (F12).</p>
+                </div>`;
             }
         });
     </script>
