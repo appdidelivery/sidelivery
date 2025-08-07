@@ -3,35 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel de Admin - Loja de Conveniência</title>
+    <title>Painel de Admin - SI Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
-        .hidden { display: none; }
-        .tab-active { border-color: #3b82f6; color: #3b82f6; font-weight: 600; }
-        .tab-inactive { border-color: transparent; color: #6b7280; }
-        
-        @keyframes pulse-bg {
-            0%, 100% { background-color: transparent; }
-            50% { background-color: #dbeafe; } /* blue-100 */
-        }
-        .new-order-notify {
-            animation: pulse-bg 1.5s infinite;
-        }
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style> 
+        body { 
+            font-family: 'Inter', sans-serif; 
+        } 
     </style>
 </head>
-<body class="text-gray-800">
+<body class="bg-gray-200">
 
-    <!-- Tela de Carregamento Inicial -->
     <div id="app-loader" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         <i class="fa-solid fa-spinner fa-spin fa-3x text-blue-500"></i>
         <p class="mt-4 text-lg text-gray-600">A carregar painel...</p>
     </div>
 
-    <!-- Tela de Login -->
     <div id="login-screen" class="hidden items-center justify-center min-h-screen bg-gray-100">
         <div class="w-full max-w-sm p-8 bg-white rounded-2xl shadow-lg">
             <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Painel de Admin</h2>
@@ -51,107 +39,101 @@
         </div>
     </div>
 
-    <!-- Painel Principal -->
-    <div id="admin-panel" class="hidden">
-        <header class="bg-white shadow-md">
-            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-gray-800">Painel de Controlo</h1>
-                <button id="logout-btn" class="text-sm text-gray-600 hover:text-blue-600">
-                    <i class="fa-solid fa-right-from-bracket mr-1"></i>Sair
-                </button>
-            </div>
-        </header>
 
-        <main class="container mx-auto p-6">
-            <!-- Abas de Navegação -->
-            <div class="border-b border-gray-200 mb-6">
-                <nav class="flex space-x-6" aria-label="Tabs">
-                    <button class="tab-btn tab-active py-2 px-1 text-sm font-medium" data-tab="orders">
-                        <i class="fa-solid fa-receipt mr-2"></i>Pedidos
-                        <span id="new-order-badge" class="hidden ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">NOVO</span>
-                    </button>
-                    <button class="tab-btn tab-inactive py-2 px-1 text-sm font-medium" data-tab="products">
-                        <i class="fa-solid fa-box-archive mr-2"></i>Produtos
-                    </button>
+    <div id="admin-panel" class="hidden h-screen bg-gray-200">
+        <div class="flex h-full">
+            <!-- Sidebar -->
+            <div class="w-64 bg-gray-800 text-white p-5 flex flex-col">
+                <h1 class="text-2xl font-bold mb-10">Admin SI Delivery</h1>
+                <nav>
+                    <a href="#orders" class="nav-link block py-2.5 px-4 rounded bg-gray-700">Pedidos</a>
+                    <a href="#products" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Produtos</a>
+                    <a href="#coupons" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Cupons</a>
                 </nav>
-            </div>
-
-            <!-- Conteúdo da Aba de Pedidos -->
-            <div id="orders-tab" class="tab-content">
-                <h2 class="text-2xl font-bold mb-4">Pedidos Recebidos</h2>
-                <div id="orders-list" class="space-y-4">
-                    <!-- Pedidos serão inseridos aqui -->
+                <div class="mt-auto">
+                    <p id="auth-info-admin" class="text-xs text-gray-400">Carregando...</p>
+                    <button id="logout-btn" class="w-full mt-2 text-left py-2.5 px-4 rounded hover:bg-red-500 transition-colors">Sair</button>
                 </div>
             </div>
 
-            <!-- Conteúdo da Aba de Produtos -->
-            <div id="products-tab" class="tab-content hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">Gerir Produtos</h2>
-                    <button id="add-product-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
-                        <i class="fa-solid fa-plus"></i>Adicionar Produto
-                    </button>
-                </div>
-                <div class="bg-white p-4 rounded-lg shadow">
-                    <table class="w-full text-left">
-                        <thead class="border-b-2 border-gray-200">
-                            <tr>
-                                <th class="p-3">Produto</th>
-                                <th class="p-3">Preço</th>
-                                <th class="p-3">Stock</th>
-                                <th class="p-3 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="products-list">
-                            <!-- Produtos serão inseridos aqui -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
+            <!-- Main Content -->
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                    
+                    <!-- Seção de Pedidos -->
+                    <section id="orders" class="admin-section">
+                        <h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2>
+                        <div id="orders-list" class="space-y-4">
+                            <p class="text-gray-500">A carregar pedidos...</p>
+                        </div>
+                    </section>
 
-    <!-- Modal para Adicionar/Editar Produto -->
-    <div id="product-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="modal-backdrop fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg m-4 z-10">
-            <form id="product-form" class="p-6">
-                <h3 id="modal-title" class="text-xl font-bold mb-6">Adicionar Novo Produto</h3>
-                <input type="hidden" id="product-id">
-                <div class="space-y-4">
-                    <div>
-                        <label for="product-name" class="block text-sm font-medium text-gray-600 mb-1">Nome do Produto</label>
-                        <input type="text" id="product-name" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label for="product-price" class="block text-sm font-medium text-gray-600 mb-1">Preço (R$)</label>
-                        <input type="number" step="0.01" id="product-price" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label for="product-stock" class="block text-sm font-medium text-gray-600 mb-1">Stock</label>
-                        <input type="number" id="product-stock" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
-                    </div>
-                     <div>
-                        <label for="product-image" class="block text-sm font-medium text-gray-600 mb-1">URL da Imagem</label>
-                        <input type="url" id="product-image" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" placeholder="https://exemplo.com/imagem.png">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 mt-8">
-                    <button type="button" id="cancel-product-btn" class="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">Guardar</button>
-                </div>
-            </form>
+                    <!-- Seção de Produtos -->
+                    <section id="products" class="admin-section hidden">
+                        <h2 class="text-2xl font-semibold mb-4">Gerir Produtos</h2>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 id="form-title" class="text-xl font-bold mb-4">Adicionar Novo Produto</h3>
+                            <form id="product-form" class="space-y-4">
+                                <input type="hidden" id="product-id">
+                                <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-2 border rounded" required>
+                                <input type="number" id="product-price" placeholder="Preço (ex: 5.50)" step="0.01" class="w-full p-2 border rounded" required>
+                                <select id="product-category" class="w-full p-2 border rounded" required>
+                                    <option value="">Selecione a Categoria</option>
+                                    <option value="Cervejas">Cervejas</option>
+                                    <option value="Destilados">Destilados</option>
+                                    <option value="Vinhos">Vinhos</option>
+                                    <option value="Sem Álcool">Sem Álcool</option>
+                                    <option value="Para Acompanhar">Para Acompanhar</option>
+                                </select>
+                                <input type="text" id="product-image-url" placeholder="URL da Imagem" class="w-full p-2 border rounded">
+                                <div class="flex space-x-2">
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Produto</button>
+                                    <button type="button" id="cancel-edit-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400 hidden">Cancelar Edição</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Produtos Cadastrados</h3>
+                            <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <p class="text-gray-500">A carregar produtos...</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Seção de Cupons -->
+                    <section id="coupons" class="admin-section hidden">
+                        <h2 class="text-2xl font-semibold mb-4">Gerir Cupons</h2>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 id="coupon-form-title" class="text-xl font-bold mb-4">Criar Novo Cupom</h3>
+                            <form id="coupon-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                                <input type="text" id="coupon-code-admin" placeholder="Código (ex: BEMVINDO10)" class="p-2 border rounded uppercase" required>
+                                <select id="coupon-type-admin" class="p-2 border rounded" required>
+                                    <option value="percentage">Percentagem (%)</option>
+                                    <option value="fixed">Valor Fixo (R$)</option>
+                                </select>
+                                <input type="number" id="coupon-value-admin" placeholder="Valor" step="0.01" class="w-full p-2 border rounded" required>
+                                <button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Cupom</button>
+                            </form>
+                        </div>
+                        <div class="mt-8">
+                            <h3 class="text-xl font-bold mb-4">Cupons Ativos</h3>
+                            <div id="coupons-list" class="space-y-2">
+                                 <p class="text-gray-500">A carregar cupons...</p>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM carregado. A iniciar script do painel de admin.");
-
             // --- ELEMENTOS DO DOM ---
             const appLoader = document.getElementById('app-loader');
             const loginScreen = document.getElementById('login-screen');
@@ -159,14 +141,6 @@
             const loginForm = document.getElementById('login-form');
             const loginError = document.getElementById('login-error');
             const logoutBtn = document.getElementById('logout-btn');
-            const productsListEl = document.getElementById('products-list');
-            const ordersListEl = document.getElementById('orders-list');
-            const productModal = document.getElementById('product-modal');
-            const productForm = document.getElementById('product-form');
-            const cancelProductBtn = document.getElementById('cancel-product-btn');
-            const addProductBtn = document.getElementById('add-product-btn');
-            const modalTitle = document.getElementById('modal-title');
-            const newOrderBadge = document.getElementById('new-order-badge');
 
             // --- CONFIGURAÇÃO DO FIREBASE ---
             const firebaseConfig = {
@@ -177,276 +151,263 @@
                 messagingSenderId: "344839359009",
                 appId: "1:344839359009:web:c5e4af43649c5a39d8f160"
             };
+            
+            // --- INICIALIZAÇÃO DO FIREBASE ---
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
 
-            // --- INICIALIZAÇÃO ---
-            try {
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-                console.log("Firebase inicializado com sucesso.");
-                
-                // --- NAVEGAÇÃO POR ABAS ---
-                const tabButtons = document.querySelectorAll('.tab-btn');
-                const tabContents = document.querySelectorAll('.tab-content');
-                const originalTitle = document.title;
+            const productsCollection = collection(db, "products");
+            const ordersCollection = collection(db, "orders");
+            const couponsCollection = collection(db, "coupons");
 
-                tabButtons.forEach(button => {
-                    button.addEventListener('click', () => {
-                        tabButtons.forEach(btn => btn.classList.replace('tab-active', 'tab-inactive'));
-                        button.classList.replace('tab-inactive', 'tab-active');
-                        
-                        tabContents.forEach(content => content.classList.add('hidden'));
-                        const tabId = button.dataset.tab;
-                        document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+            // --- AUTENTICAÇÃO ---
+            onAuthStateChanged(auth, async (user) => {
+                appLoader.classList.add('hidden');
+                if (user) {
+                    document.getElementById('auth-info-admin').textContent = `Admin Conectado`;
+                    adminPanel.classList.remove('hidden');
+                    loginScreen.classList.add('hidden');
+                    loginScreen.classList.remove('flex');
+                    
+                    await addSampleDataIfNeeded(); // Adiciona dados de exemplo se necessário
+                    
+                    listenToOrders();
+                    listenToProducts();
+                    listenToCoupons();
+                } else {
+                    adminPanel.classList.add('hidden');
+                    loginScreen.classList.remove('hidden');
+                    loginScreen.classList.add('flex');
+                }
+            });
 
-                        if (tabId === 'orders') {
-                            clearOrderNotification();
-                        }
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                signInWithEmailAndPassword(auth, loginForm.email.value, loginForm.password.value)
+                    .catch(error => {
+                        loginError.textContent = "Email ou senha inválidos.";
+                        loginError.classList.remove('hidden');
+                    });
+            });
+
+            logoutBtn.addEventListener('click', () => signOut(auth));
+
+            // --- NAVEGAÇÃO ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('.admin-section');
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    navLinks.forEach(l => l.classList.remove('bg-gray-700'));
+                    link.classList.add('bg-gray-700');
+                    
+                    const targetId = link.getAttribute('href').substring(1);
+                    sections.forEach(section => {
+                        section.id === targetId ? section.classList.remove('hidden') : section.classList.add('hidden');
                     });
                 });
+            });
 
-                // --- AUTENTICAÇÃO ---
-                onAuthStateChanged(auth, user => {
-                    appLoader.classList.add('hidden'); // Esconde o loader principal
-                    try {
-                        if (user) {
-                            console.log("Utilizador autenticado:", user.uid);
-                            loginScreen.classList.add('hidden');
-                            loginScreen.classList.remove('flex');
-                            adminPanel.classList.remove('hidden');
-                            initListeners();
-                        } else {
-                            console.log("Nenhum utilizador autenticado. A exibir ecrã de login.");
-                            adminPanel.classList.add('hidden');
-                            loginScreen.classList.remove('hidden');
-                            loginScreen.classList.add('flex');
-                        }
-                    } catch (e) {
-                        console.error("Erro no onAuthStateChanged:", e);
+            // --- ADICIONAR DADOS DE EXEMPLO ---
+            async function addSampleDataIfNeeded() {
+                const q = query(productsCollection);
+                const snapshot = await getDocs(q);
+                if (snapshot.empty) {
+                    console.log("Base de dados de produtos vazia. A adicionar produtos de exemplo...");
+                    const sampleProducts = [
+                        { name: 'Cerveja Brahma 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/E53935/FFFFFF?text=Brahma' },
+                        { name: 'Cerveja Skol 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/FFC107/000000?text=Skol' },
+                        { name: 'Cerveja Heineken 330ml', price: 5.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Heineken' },
+                        { name: 'Gin Tanqueray 750ml', price: 99.90, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/009688/FFFFFF?text=Gin' },
+                        { name: 'Vodka Absolut 750ml', price: 89.90, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/03A9F4/FFFFFF?text=Vodka' },
+                        { name: 'Whisky Red Label 750ml', price: 85.00, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/f44336/FFFFFF?text=Whisky' },
+                        { name: 'Vinho Casillero del Diablo 750ml', price: 55.00, category: 'Vinhos', imageUrl: 'https://placehold.co/300x200/880E4F/FFFFFF?text=Vinho' },
+                        { name: 'Coca-Cola 2L', price: 9.00, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/c62828/FFFFFF?text=Coca-Cola' },
+                        { name: 'Guaraná Antarctica 2L', price: 8.50, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/558b2f/FFFFFF?text=Guaraná' },
+                        { name: 'Água Mineral 500ml', price: 2.50, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/2196F3/FFFFFF?text=Água' },
+                        { name: 'Gelo em Cubo 5kg', price: 10.00, category: 'Para Acompanhar', imageUrl: 'https://placehold.co/300x200/E0F7FA/000000?text=Gelo' },
+                        { name: 'Carvão 3kg', price: 15.00, category: 'Para Acompanhar', imageUrl: 'https://placehold.co/300x200/616161/FFFFFF?text=Carvão' },
+                    ];
+                    for (const product of sampleProducts) {
+                        await addDoc(productsCollection, product);
                     }
-                });
+                }
+            }
 
-                loginForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    const email = loginForm.email.value;
-                    const password = loginForm.password.value;
-                    signInWithEmailAndPassword(auth, email, password)
-                        .catch(error => {
-                            console.error("Erro no login:", error);
-                            loginError.textContent = `Erro: ${error.code}`;
-                            loginError.classList.remove('hidden');
-                        });
-                });
-
-                logoutBtn.addEventListener('click', () => {
-                    signOut(auth);
-                });
-
-                // --- FUNÇÕES DE RENDERIZAÇÃO ---
-                const renderProducts = (products) => {
-                    productsListEl.innerHTML = products.map(product => `
-                        <tr class="border-b border-gray-100">
-                            <td class="p-3 flex items-center gap-3">
-                                <img src="${product.imageUrl || 'https://placehold.co/40x40/e2e8f0/e2e8f0?text=IMG'}" alt="${product.name}" class="w-10 h-10 rounded-md object-cover">
-                                <span class="font-medium">${product.name}</span>
-                            </td>
-                            <td class="p-3">R$ ${product.price.toFixed(2)}</td>
-                            <td class="p-3">${product.stock}</td>
-                            <td class="p-3 text-center">
-                                <button class="edit-product-btn text-blue-600 hover:text-blue-800 p-2" data-id="${product.id}"><i class="fa-solid fa-pen"></i></button>
-                                <button class="delete-product-btn text-red-600 hover:text-red-800 p-2" data-id="${product.id}"><i class="fa-solid fa-trash"></i></button>
-                            </td>
-                        </tr>
-                    `).join('');
-                    attachProductActionListeners();
-                };
-                
-                const renderOrders = (orders) => {
-                    if (orders.length === 0) {
-                        ordersListEl.innerHTML = `<div class="text-center py-10 bg-white rounded-lg shadow"><p class="text-gray-500">Nenhum pedido recebido ainda.</p></div>`;
+            // --- GERENCIAMENTO DE PEDIDOS ---
+            function listenToOrders() {
+                const q = query(ordersCollection);
+                onSnapshot(q, (snapshot) => {
+                    const ordersList = document.getElementById('orders-list');
+                    if (snapshot.empty) {
+                        ordersList.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>';
                         return;
                     }
-                    ordersListEl.innerHTML = orders.map(order => `
-                        <div class="bg-white p-4 rounded-lg shadow">
+                    let orders = [];
+                    snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+                    orders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
+                    ordersList.innerHTML = orders.map(order => `
+                        <div class="bg-white p-4 rounded-lg shadow-md">
                             <div class="flex justify-between items-start">
                                 <div>
-                                    <p class="font-bold">Pedido #${order.id.substring(0, 6)}</p>
-                                    <p class="text-sm text-gray-500">Cliente: ${order.customerName}</p>
-                                    <p class="text-sm text-gray-500">${new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR')}</p>
+                                    <p class="font-bold">${order.customerName}</p>
+                                    <p class="text-sm text-gray-600">${order.customerAddress}</p>
+                                    <p class="text-sm text-gray-500">${order.createdAt.toDate().toLocaleString('pt-BR')}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-bold text-lg">R$ ${order.total.toFixed(2)}</p>
-                                    <select class="order-status-select mt-2 p-2 border rounded-lg" data-id="${order.id}">
-                                        <option value="Recebido" ${order.status === 'Recebido' ? 'selected' : ''}>Recebido</option>
-                                        <option value="Em Preparo" ${order.status === 'Em Preparo' ? 'selected' : ''}>Em Preparo</option>
-                                        <option value="Saiu para Entrega" ${order.status === 'Saiu para Entrega' ? 'selected' : ''}>Saiu para Entrega</option>
-                                        <option value="Concluído" ${order.status === 'Concluído' ? 'selected' : ''}>Concluído</option>
-                                        <option value="Cancelado" ${order.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
-                                    </select>
+                                    <p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p>
+                                    <p class="text-sm">Pagamento: ${order.paymentMethod === 'online' ? 'Online' : 'Na Entrega'}</p>
                                 </div>
                             </div>
-                            <div class="mt-4 border-t pt-2">
-                                <h4 class="font-semibold mb-2">Itens:</h4>
-                                <ul class="space-y-1">
-                                    ${order.items.map(item => `
-                                        <li class="text-sm text-gray-600 flex justify-between">
-                                            <span>${item.quantity}x ${item.name}</span>
-                                            <span>R$ ${(item.price * item.quantity).toFixed(2)}</span>
-                                        </li>`).join('')}
+                             <div class="mt-2">
+                                <ul class="list-disc list-inside text-sm">
+                                    ${order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}
                                 </ul>
+                            </div>
+                            ${order.instructions ? `<div class="mt-2 p-2 bg-yellow-100 rounded-md text-sm"><strong>Instruções:</strong> ${order.instructions}</div>` : ''}
+                            ${order.coupon ? `<div class="mt-2 text-sm text-green-600"><strong>Cupom Usado:</strong> ${order.coupon.code} (-R$ ${order.coupon.discount.toFixed(2).replace('.',',')})</div>` : ''}
+                            <div class="mt-4 flex items-center justify-between">
+                                <p class="text-sm font-semibold">Status:</p>
+                                <select onchange="updateOrderStatus('${order.id}', this.value)" class="p-2 border rounded">
+                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendente</option>
+                                    <option value="in_preparation" ${order.status === 'in_preparation' ? 'selected' : ''}>Em Preparo</option>
+                                    <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Saiu para Entrega</option>
+                                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Concluído</option>
+                                    <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>Cancelado</option>
+                                </select>
                             </div>
                         </div>
                     `).join('');
-                    attachOrderActionListeners();
-                };
-
-                // --- NOTIFICAÇÕES ---
-                const showOrderNotification = () => {
-                    document.title = '(!) Novo Pedido!';
-                    newOrderBadge.classList.remove('hidden');
-                    const ordersTabButton = document.querySelector('button[data-tab="orders"]');
-                    ordersTabButton.classList.add('new-order-notify');
-                    
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        const oscillator = audioContext.createOscillator();
-                        const gainNode = audioContext.createGain();
-                        oscillator.connect(gainNode);
-                        gainNode.connect(audioContext.destination);
-                        oscillator.type = 'sine';
-                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
-                        oscillator.start();
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                    } catch(e) {
-                        console.warn("Não foi possível tocar o som de notificação.", e);
-                    }
-                };
-
-                const clearOrderNotification = () => {
-                    document.title = originalTitle;
-                    newOrderBadge.classList.add('hidden');
-                    const ordersTabButton = document.querySelector('button[data-tab="orders"]');
-                    ordersTabButton.classList.remove('new-order-notify');
-                };
-
-                // --- LISTENERS DO FIREBASE ---
-                let productsUnsubscribe = null;
-                let ordersUnsubscribe = null;
-                let productsCache = [];
-                let ordersCache = [];
-                let isFirstOrderLoad = true;
-
-                function initListeners() {
-                    try {
-                        if (productsUnsubscribe) productsUnsubscribe();
-                        productsUnsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-                            productsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            renderProducts(productsCache);
-                        }, (error) => console.error("Erro no listener de produtos:", error));
-
-                        if (ordersUnsubscribe) ordersUnsubscribe();
-                        ordersUnsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
-                            const newOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            newOrders.sort((a, b) => b.createdAt - a.createdAt);
-                            
-                            if (!isFirstOrderLoad && newOrders.length > ordersCache.length) {
-                                showOrderNotification();
-                            }
-
-                            ordersCache = newOrders;
-                            isFirstOrderLoad = false;
-                            renderOrders(ordersCache);
-                        }, (error) => console.error("Erro no listener de pedidos:", error));
-                    } catch (e) {
-                        console.error("Erro ao iniciar listeners do Firestore:", e);
-                    }
-                }
-
-                // --- MODAL DE PRODUTOS ---
-                const openProductModal = (product = null) => {
-                    productForm.reset();
-                    if (product) {
-                        modalTitle.textContent = 'Editar Produto';
-                        document.getElementById('product-id').value = product.id;
-                        document.getElementById('product-name').value = product.name;
-                        document.getElementById('product-price').value = product.price;
-                        document.getElementById('product-stock').value = product.stock;
-                        document.getElementById('product-image').value = product.imageUrl || '';
-                    } else {
-                        modalTitle.textContent = 'Adicionar Novo Produto';
-                    }
-                    productModal.classList.remove('hidden');
-                    productModal.classList.add('flex');
-                };
-
-                const closeProductModal = () => {
-                    productModal.classList.add('hidden');
-                    productModal.classList.remove('flex');
-                };
-
-                addProductBtn.addEventListener('click', () => openProductModal());
-                cancelProductBtn.addEventListener('click', closeProductModal);
-                productModal.querySelector('.modal-backdrop').addEventListener('click', closeProductModal);
-
-                // --- AÇÕES DE PRODUTOS (CRUD) ---
-                productForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const id = document.getElementById('product-id').value;
-                    const productData = {
-                        name: document.getElementById('product-name').value,
-                        price: parseFloat(document.getElementById('product-price').value),
-                        stock: parseInt(document.getElementById('product-stock').value),
-                        imageUrl: document.getElementById('product-image').value,
-                    };
-
-                    try {
-                        if (id) {
-                            await setDoc(doc(db, "products", id), productData);
-                        } else {
-                            await addDoc(collection(db, "products"), productData);
-                        }
-                        closeProductModal();
-                    } catch (error) {
-                        console.error("Erro ao guardar produto:", error);
-                        alert("Erro ao guardar produto. Verifique a consola para mais detalhes.");
-                    }
                 });
-                
-                function attachProductActionListeners() {
-                    document.querySelectorAll('.edit-product-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const product = productsCache.find(p => p.id === btn.dataset.id);
-                            openProductModal(product);
-                        });
-                    });
-                    document.querySelectorAll('.delete-product-btn').forEach(btn => {
-                        btn.addEventListener('click', async () => {
-                            if (confirm('Tem a certeza que deseja eliminar este produto?')) {
-                                await deleteDoc(doc(db, "products", btn.dataset.id));
-                            }
-                        });
-                    });
-                }
-                
-                // --- AÇÕES DE PEDIDOS ---
-                function attachOrderActionListeners() {
-                    document.querySelectorAll('.order-status-select').forEach(select => {
-                        select.addEventListener('change', async (e) => {
-                            const orderId = e.target.dataset.id;
-                            const newStatus = e.target.value;
-                            await updateDoc(doc(db, "orders", orderId), { status: newStatus });
-                        });
-                    });
-                }
+            }
 
-            } catch (e) {
-                console.error("Erro fatal na inicialização do Firebase:", e);
-                appLoader.innerHTML = `<div class="p-4 bg-red-100 text-red-800 text-center">
-                    <p class="font-bold">Erro crítico na configuração do Firebase.</p>
-                    <p class="text-sm">Verifique a consola para mais detalhes (F12).</p>
-                </div>`;
+            window.updateOrderStatus = async (orderId, newStatus) => {
+                await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+            };
+
+            // --- GERENCIAMENTO DE PRODUTOS (CRUD) ---
+            const productForm = document.getElementById('product-form');
+            const cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+            productForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('product-id').value;
+                const productData = {
+                    name: document.getElementById('product-name').value,
+                    price: parseFloat(document.getElementById('product-price').value),
+                    category: document.getElementById('product-category').value,
+                    imageUrl: document.getElementById('product-image-url').value,
+                };
+
+                if (id) {
+                    await updateDoc(doc(db, "products", id), productData);
+                } else {
+                    await addDoc(productsCollection, productData);
+                }
+                resetForm();
+            });
+
+            cancelEditBtn.addEventListener('click', resetForm);
+
+            function resetForm() {
+                productForm.reset();
+                document.getElementById('product-id').value = '';
+                document.getElementById('form-title').textContent = 'Adicionar Novo Produto';
+                cancelEditBtn.classList.add('hidden');
+            }
+
+            function listenToProducts() {
+                onSnapshot(productsCollection, (snapshot) => {
+                    const productsList = document.getElementById('products-list');
+                    if (snapshot.empty) {
+                        productsList.innerHTML = '<p class="text-gray-500">Nenhum produto cadastrado.</p>';
+                        return;
+                    }
+                    productsList.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const product = { id: doc.id, ...doc.data() };
+                        const card = document.createElement('div');
+                        card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col';
+                        card.innerHTML = `
+                            <img src="${product.imageUrl || 'https://placehold.co/300x200/CCCCCC/FFFFFF?text=Sem+Imagem'}" alt="${product.name}" class="w-full h-32 object-cover rounded-md mb-4">
+                            <h4 class="font-bold flex-1">${product.name}</h4>
+                            <p class="text-gray-600">${product.category}</p>
+                            <p class="text-green-600 font-semibold text-lg">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
+                            <div class="mt-4 flex space-x-2">
+                                <button class="edit-btn w-full bg-yellow-400 text-sm py-1 rounded hover:bg-yellow-500">Editar</button>
+                                <button class="delete-btn w-full bg-red-500 text-white text-sm py-1 rounded hover:bg-red-600">Excluir</button>
+                            </div>
+                        `;
+                        card.querySelector('.edit-btn').addEventListener('click', () => editProduct(product));
+                        card.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product.id, product.name));
+                        productsList.appendChild(card);
+                    });
+                });
+            }
+
+            function editProduct(product) {
+                document.getElementById('product-id').value = product.id;
+                document.getElementById('product-name').value = product.name;
+                document.getElementById('product-price').value = product.price;
+                document.getElementById('product-category').value = product.category;
+                document.getElementById('product-image-url').value = product.imageUrl;
+                document.getElementById('form-title').textContent = 'A editar Produto';
+                cancelEditBtn.classList.remove('hidden');
+                window.scrollTo({ top: document.getElementById('products').offsetTop, behavior: 'smooth' });
+            }
+
+            async function deleteProduct(id, name) {
+                if (confirm(`Tem a certeza que deseja eliminar o produto "${name}"?`)) {
+                    await deleteDoc(doc(db, "products", id));
+                }
+            }
+
+            // --- GERENCIAMENTO DE CUPONS ---
+            document.getElementById('coupon-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
+                const couponData = {
+                    type: document.getElementById('coupon-type-admin').value,
+                    value: parseFloat(document.getElementById('coupon-value-admin').value),
+                    active: true
+                };
+                if (!code || !couponData.value) return;
+                
+                await setDoc(doc(db, "coupons", code), couponData);
+                document.getElementById('coupon-form').reset();
+            });
+
+            function listenToCoupons() {
+                onSnapshot(query(couponsCollection), (snapshot) => {
+                    const listEl = document.getElementById('coupons-list');
+                    if (snapshot.empty) {
+                        listEl.innerHTML = '<p class="text-gray-500">Nenhum cupom criado.</p>';
+                        return;
+                    }
+                    listEl.innerHTML = '';
+                    snapshot.forEach(doc => {
+                        const coupon = { id: doc.id, ...doc.data() };
+                        const couponCard = document.createElement('div');
+                        couponCard.className = 'bg-white p-3 rounded-md shadow-sm flex justify-between items-center';
+                        couponCard.innerHTML = `
+                            <div>
+                                <span class="font-mono bg-gray-200 px-2 py-1 rounded">${coupon.id}</span>
+                                <span class="ml-4">${coupon.type === 'fixed' ? `R$ ${coupon.value.toFixed(2).replace('.',',')}` : `${coupon.value}%`} de desconto</span>
+                            </div>
+                            <button class="delete-coupon-btn text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        `;
+                        couponCard.querySelector('.delete-coupon-btn').addEventListener('click', () => deleteCoupon(coupon.id));
+                        listEl.appendChild(couponCard);
+                    });
+                });
+            }
+
+            async function deleteCoupon(id) {
+                if (confirm(`Tem a certeza que deseja eliminar o cupom "${id}"?`)) {
+                    await deleteDoc(doc(db, "coupons", id));
+                }
             }
         });
     </script>
