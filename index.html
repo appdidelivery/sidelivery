@@ -3,92 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste de Diagnóstico - Loja</title>
+    <title>Teste de Conexão</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700&display=swap');
         body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100">
-
-    <div class="flex items-center justify-center min-h-screen">
-        <div id="status-container" class="text-center p-8 bg-white rounded-lg shadow-lg max-w-lg">
-            <h1 class="text-2xl font-bold mb-4">Teste de Diagnóstico da Aplicação</h1>
-            <div id="status-message" class="p-4 rounded-md">
-                <i class="fa-solid fa-spinner fa-spin fa-2x text-blue-500"></i>
-                <p class="mt-2 text-gray-600">A iniciar teste...</p>
-            </div>
-        </div>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="text-center p-10 bg-white rounded-lg shadow-2xl">
+        <h1 class="text-5xl font-bold text-green-600">Olá Mundo!</h1>
+        <p class="mt-4 text-lg text-gray-700">Se está a ver isto, a sua publicação na Netlify está a funcionar corretamente.</p>
     </div>
-
-    <script type="module">
-        // Este é um script de teste para isolar problemas de ligação com o Firebase.
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const statusMessageDiv = document.getElementById('status-message');
-
-            const updateStatus = (message, isError = false) => {
-                console.log(isError ? `ERRO: ${message}` : `STATUS: ${message}`);
-                const icon = isError 
-                    ? '<i class="fa-solid fa-circle-xmark fa-2x text-red-500"></i>'
-                    : '<i class="fa-solid fa-circle-check fa-2x text-green-500"></i>';
-                
-                statusMessageDiv.innerHTML = `
-                    ${icon}
-                    <p class="mt-2 font-semibold ${isError ? 'text-red-700' : 'text-green-700'}">${message}</p>
-                `;
-                statusMessageDiv.className = `p-4 rounded-md ${isError ? 'bg-red-100' : 'bg-green-100'}`;
-            };
-
-            const firebaseConfig = {
-                apiKey: "AIzaSyD_LdDobMQqltW6ejDwibcyoeUoX_BoHEs",
-                authDomain: "zetesteapp.firebaseapp.com",
-                projectId: "zetesteapp",
-                storageBucket: "zetesteapp.firebasestorage.app",
-                messagingSenderId: "344839359009",
-                appId: "1:344839359009:web:c5e4af43649c5a39d8f160"
-            };
-
-            try {
-                // Passo 1: Inicializar o Firebase
-                const app = initializeApp(firebaseConfig);
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-                updateStatus("Firebase inicializado com sucesso.");
-
-                // Passo 2: Tentar login anónimo
-                signInAnonymously(auth)
-                    .then((userCredential) => {
-                        const user = userCredential.user;
-                        updateStatus("Login anónimo bem-sucedido. A obter produtos...");
-
-                        // Passo 3: Tentar ler a coleção de produtos
-                        const productsCollection = collection(db, "products");
-                        onSnapshot(productsCollection, (snapshot) => {
-                            const productCount = snapshot.size;
-                            updateStatus(`SUCESSO! Ligação estabelecida. ${productCount} produto(s) encontrado(s).`);
-                        }, (error) => {
-                            console.error("Erro no listener do Firestore:", error);
-                            updateStatus(`Erro ao ler produtos: ${error.message}. Verifique as regras de segurança do Firestore.`, true);
-                        });
-
-                    })
-                    .catch((error) => {
-                        console.error("Erro no login anónimo:", error);
-                        updateStatus(`Erro no login anónimo: ${error.message}. Verifique a configuração de autenticação.`, true);
-                    });
-
-            } catch (e) {
-                console.error("Erro fatal na inicialização:", e);
-                updateStatus(`Erro crítico na inicialização: ${e.message}. Verifique a configuração do Firebase (firebaseConfig).`, true);
-            }
-        });
-    </script>
-
 </body>
 </html>
