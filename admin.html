@@ -28,7 +28,7 @@
     <!-- Tela de Carregamento Inicial -->
     <div id="app-loader" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
         <i class="fa-solid fa-spinner fa-spin fa-3x text-blue-500"></i>
-        <p class="mt-4 text-lg text-gray-600">Carregando painel...</p>
+        <p class="mt-4 text-lg text-gray-600">A carregar painel...</p>
     </div>
 
     <!-- Tela de Login -->
@@ -55,7 +55,7 @@
     <div id="admin-panel" class="hidden">
         <header class="bg-white shadow-md">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-xl font-bold text-gray-800">Painel de Controle</h1>
+                <h1 class="text-xl font-bold text-gray-800">Painel de Controlo</h1>
                 <button id="logout-btn" class="text-sm text-gray-600 hover:text-blue-600">
                     <i class="fa-solid fa-right-from-bracket mr-1"></i>Sair
                 </button>
@@ -87,7 +87,7 @@
             <!-- Conteúdo da Aba de Produtos -->
             <div id="products-tab" class="tab-content hidden">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold">Gerenciar Produtos</h2>
+                    <h2 class="text-2xl font-bold">Gerir Produtos</h2>
                     <button id="add-product-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-plus"></i>Adicionar Produto
                     </button>
@@ -98,7 +98,7 @@
                             <tr>
                                 <th class="p-3">Produto</th>
                                 <th class="p-3">Preço</th>
-                                <th class="p-3">Estoque</th>
+                                <th class="p-3">Stock</th>
                                 <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
@@ -128,7 +128,7 @@
                         <input type="number" step="0.01" id="product-price" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
                     </div>
                     <div>
-                        <label for="product-stock" class="block text-sm font-medium text-gray-600 mb-1">Estoque</label>
+                        <label for="product-stock" class="block text-sm font-medium text-gray-600 mb-1">Stock</label>
                         <input type="number" id="product-stock" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
                     </div>
                      <div>
@@ -138,7 +138,7 @@
                 </div>
                 <div class="flex justify-end space-x-3 mt-8">
                     <button type="button" id="cancel-product-btn" class="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">Salvar</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">Guardar</button>
                 </div>
             </form>
         </div>
@@ -150,7 +150,7 @@
         import { getFirestore, collection, onSnapshot, doc, addDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM carregado. Iniciando script do painel de admin.");
+            console.log("DOM carregado. A iniciar script do painel de admin.");
 
             // --- ELEMENTOS DO DOM ---
             const appLoader = document.getElementById('app-loader');
@@ -210,13 +210,13 @@
                     appLoader.classList.add('hidden'); // Esconde o loader principal
                     try {
                         if (user) {
-                            console.log("Usuário autenticado:", user.uid);
+                            console.log("Utilizador autenticado:", user.uid);
                             loginScreen.classList.add('hidden');
                             loginScreen.classList.remove('flex');
                             adminPanel.classList.remove('hidden');
                             initListeners();
                         } else {
-                            console.log("Nenhum usuário autenticado. Exibindo tela de login.");
+                            console.log("Nenhum utilizador autenticado. A exibir ecrã de login.");
                             adminPanel.classList.add('hidden');
                             loginScreen.classList.remove('hidden');
                             loginScreen.classList.add('flex');
@@ -409,8 +409,8 @@
                         }
                         closeProductModal();
                     } catch (error) {
-                        console.error("Erro ao salvar produto:", error);
-                        alert("Erro ao salvar produto. Verifique o console para mais detalhes.");
+                        console.error("Erro ao guardar produto:", error);
+                        alert("Erro ao guardar produto. Verifique a consola para mais detalhes.");
                     }
                 });
                 
@@ -423,7 +423,7 @@
                     });
                     document.querySelectorAll('.delete-product-btn').forEach(btn => {
                         btn.addEventListener('click', async () => {
-                            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                            if (confirm('Tem a certeza que deseja eliminar este produto?')) {
                                 await deleteDoc(doc(db, "products", btn.dataset.id));
                             }
                         });
@@ -445,7 +445,7 @@
                 console.error("Erro fatal na inicialização do Firebase:", e);
                 appLoader.innerHTML = `<div class="p-4 bg-red-100 text-red-800 text-center">
                     <p class="font-bold">Erro crítico na configuração do Firebase.</p>
-                    <p class="text-sm">Verifique o console para mais detalhes (F12).</p>
+                    <p class="text-sm">Verifique a consola para mais detalhes (F12).</p>
                 </div>`;
             }
         });
