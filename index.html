@@ -49,7 +49,14 @@
             <div id="home-view" class="view p-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <div class="lg:col-span-2">
-                        <div class="relative bg-blue-600 text-white rounded-xl overflow-hidden mb-8 p-8 flex items-center min-h-[200px]"><div class="absolute inset-0 bg-black bg-opacity-30"></div><img src="https://images.unsplash.com/photo-1618511299213-9121762c4315?q=80&w=2574&auto=format&fit=crop" class="absolute h-full w-full object-cover" alt="Banner de promoção de bebidas"><div class="relative z-10"><h2 class="text-4xl font-extrabold drop-shadow-lg">BEBIDAS GELADAS</h2><p class="mt-2 text-lg drop-shadow-md">A entrega mais rápida da cidade!</p></div></div>
+                        <div class="relative bg-blue-600 text-white rounded-xl overflow-hidden mb-8 p-8 flex items-center min-h-[200px]">
+                            <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+                            <img src="https://images.unsplash.com/photo-1571935422170-7c79231e7222?q=80&w=2574&auto=format&fit=crop" class="absolute h-full w-full object-cover" alt="Banner de promoção de bebidas">
+                            <div class="relative z-10">
+                                <h2 class="text-4xl font-extrabold drop-shadow-lg">BEBIDAS GELADAS</h2>
+                                <p class="mt-2 text-lg drop-shadow-md">A entrega mais rápida da cidade!</p>
+                            </div>
+                        </div>
                         <h2 class="text-2xl font-bold mb-4">Nosso Cardápio</h2>
                         <div id="categories-nav" class="flex flex-wrap gap-2 mb-6"></div>
                         <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
@@ -167,6 +174,21 @@
                 updateThemeIcon();
 
                 // --- FUNÇÕES DE RENDERIZAÇÃO ---
+                // Mapa de substituição de imagens
+                const imageOverrides = {
+                    'Cerveja Brahma Duplo Malte 350ml': 'https://acdn.mitiendanube.com/stores/001/335/204/products/brahma-duplo-malte-lata-350ml1-c30f8c83d63006093416239565725803-1024-1024.png',
+                    'Cerveja Skol Pilsen 350ml': 'https://cdn.dooca.store/145/products/cerveja-skol-pilsen-lata-350ml_640x640+fill_ffffff.png?v=1608313937&webp=0',
+                    'Cerveja Heineken Lager 330ml': 'https://www.imigrantesbebidas.com.br/bebida/images/products/full/1922-cerveja-heineken-long-neck-330ml.png',
+                    'Gin Tanqueray London Dry 750ml': 'https://www.paodeacucar.com/img/uploads/1/914/20237914.png',
+                    'Vodka Absolut Original 750ml': 'https://www.bancadoramon.com.br/media/catalog/product/cache/1/image/1000x/9df78eab33525d08d6e5fb8d27136e95/v/o/vodka_absolut.png',
+                    'Whisky Johnnie Walker Red Label 750ml': 'https://www.casadabebida.com.br/media/catalog/product/cache/1/image/900x900/9df78eab33525d08d6e5fb8d27136e95/w/h/whisky-johnnie-walker-red-label-750-ml.png',
+                    'Vinho Chileno Casillero del Diablo 750ml': 'https://http2.mlstatic.com/D_NQ_NP_912201-MLB20299902841_052015-O.png',
+                    'Coca-Cola Sem Açúcar 2L': 'https://images.tcdn.com.br/img/img_prod/839446/refrigerante_coca_cola_sem_acucar_2l_533_1_20201021134707.png',
+                    'Guaraná Antarctica 2L': 'https://www.paodeacucar.com/img/uploads/1/432/521432.png',
+                    'Gelo em Cubo 5kg': 'https://static.distribuidoracaue.com.br/media/catalog/product/cache/1/image/900x900/9df78eab33525d08d6e5fb8d27136e95/g/e/gelo-em-cubo-filtrado-pacote-5-kg-gelo-sete.png',
+                    'Carvão Vegetal 3kg': 'https://http2.mlstatic.com/D_NQ_NP_983193-MLB45738411209_042021-O.png'
+                };
+
                 const createProductCard = (product) => `
                     <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
                         <img src="${product.imageUrl || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=Bebida'}" alt="${product.name}" class="w-full h-40 object-contain p-2">
@@ -426,7 +448,17 @@
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
                         onSnapshot(collection(db, "products"), (snapshot) => {
-                            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            // Mapeia os produtos e substitui as imagens se necessário
+                            allProducts = snapshot.docs.map(doc => {
+                                const productData = doc.data();
+                                const newImage = imageOverrides[productData.name];
+                                return { 
+                                    id: doc.id, 
+                                    ...productData,
+                                    imageUrl: newImage || productData.imageUrl // Substitui se a imagem existir no mapa
+                                };
+                            });
+
                             renderCategories();
                             renderProducts();
                             appLoader.classList.add('hidden');
