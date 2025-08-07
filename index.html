@@ -1,101 +1,144 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loja de Conveniência - Delivery</title>
+    <title>SI Delivery - Conveniência Santa Isabel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
-        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
+        body { font-family: 'Inter', sans-serif; }
         .hidden { display: none; }
-        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+        .category-btn-active { background-color: #3b82f6; color: white; }
+        .category-btn { background-color: #e5e7eb; color: #4b5563; }
+        html.dark .category-btn { background-color: #374151; color: #d1d5db; }
+        html.dark .category-btn-active { background-color: #3b82f6; color: white; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); transition: all 0.3s ease; }
     </style>
+    <script>
+        // Lógica do Modo Escuro/Claro
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark')
+        } else {
+          document.documentElement.classList.remove('dark')
+        }
+    </script>
 </head>
-<body class="text-gray-800">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
 
-    <div id="app-loader" class="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div id="app-loader" class="flex flex-col items-center justify-center min-h-screen">
         <i class="fa-solid fa-spinner fa-spin fa-3x text-blue-500"></i>
-        <p class="mt-4 text-lg text-gray-600">A carregar loja...</p>
+        <p class="mt-4 text-lg text-gray-600 dark:text-gray-400">A carregar loja...</p>
     </div>
 
     <div id="app-content" class="hidden">
-        <header class="bg-white shadow-sm sticky top-0 z-40">
+        <header class="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-40">
             <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <h1 class="text-2xl font-bold text-blue-600">Bebidas.com</h1>
-                <button id="cart-button" class="relative">
-                    <i class="fa-solid fa-cart-shopping fa-2x text-gray-600"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                <div class="flex items-center gap-3">
+                    <!-- Logótipo de Foguete SVG -->
+                    <svg class="h-10 w-10 text-blue-600 dark:text-blue-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9.17117 14.8288L14.8288 9.17117C15.5794 8.42059 16.513 7.53015 16.9322 7.0678C18.6836 5.14984 21.3435 3.32171 21.948 3.05201C22.5525 2.78231 23.218 3.44754 22.948 4.05201C22.6783 4.65648 20.8502 7.31641 18.9322 9.0678L18.4699 9.48697C17.4698 10.487 16.5126 11.4979 15.1712 12.8288L12.8288 15.1712C11.4979 16.5126 10.487 17.4698 9.48697 18.4699L9.0678 18.9322C7.31641 20.8502 4.65648 22.6783 4.05201 22.948C3.44754 23.218 2.78231 22.5525 3.05201 21.948C3.32171 21.3435 5.14984 18.6836 7.0678 16.9322C7.53015 16.513 8.42059 15.5794 9.17117 14.8288Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M12 12L2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">SI Delivery</h1>
+                </div>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
                 </button>
             </div>
         </header>
 
-        <main class="container mx-auto p-6">
-            <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                <!-- Cards de produtos serão inseridos aqui -->
+        <main class="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Coluna de Produtos -->
+            <div class="lg:col-span-2">
+                <!-- Banner Promocional -->
+                <div class="relative bg-blue-600 text-white rounded-xl overflow-hidden mb-8 p-8 flex items-center min-h-[200px]">
+                    <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f81?q=80&w=2448&auto=format&fit=crop" class="absolute h-full w-full object-cover" alt="Banner de promoção">
+                    <div class="relative z-10">
+                        <h2 class="text-4xl font-extrabold drop-shadow-lg">BEBIDAS GELADAS</h2>
+                        <p class="mt-2 text-lg drop-shadow-md">A entrega mais rápida da cidade!</p>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-bold mb-4">Nosso Cardápio</h2>
+                <div id="categories-nav" class="flex flex-wrap gap-2 mb-6">
+                    <!-- Botões de categoria serão inseridos aqui -->
+                </div>
+                <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <p>Aguardando produtos...</p>
+                </div>
+
+                <!-- Secção de Upsell -->
+                <div id="upsell-section" class="mt-12">
+                     <h2 class="text-2xl font-bold mb-4">Para Acompanhar</h2>
+                     <div id="upsell-grid" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                        <!-- Produtos de Upsell -->
+                     </div>
+                </div>
+            </div>
+
+            <!-- Coluna do Pedido -->
+            <div class="lg:col-span-1">
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md sticky top-24">
+                    <h2 class="text-2xl font-bold mb-4">O seu Pedido</h2>
+                    <div id="cart-items" class="space-y-4 mb-4 max-h-60 overflow-y-auto">
+                        <p class="text-gray-500 dark:text-gray-400">O seu carrinho está vazio.</p>
+                    </div>
+                    
+                    <div class="border-t dark:border-gray-700 pt-4">
+                        <div class="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal">R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-green-600">
+                            <span>Desconto</span>
+                            <span id="cart-discount">- R$ 0,00</span>
+                        </div>
+                        <div class="flex justify-between items-center font-bold text-lg mt-2">
+                            <span>Total</span>
+                            <span id="cart-total">R$ 0,00</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                         <form id="coupon-form" class="flex gap-2">
+                            <input type="text" id="coupon-code" placeholder="Código do Cupom" class="w-full p-2 border dark:border-gray-600 rounded uppercase bg-gray-100 dark:bg-gray-700">
+                            <button type="submit" class="bg-gray-800 dark:bg-gray-600 text-white px-4 rounded hover:bg-gray-900 dark:hover:bg-gray-500">Aplicar</button>
+                        </form>
+                        <p id="coupon-message" class="text-sm mt-2"></p>
+                    </div>
+
+                    <hr class="my-6 dark:border-gray-700">
+
+                    <div>
+                        <h3 class="text-lg font-bold mb-4">Informações para Entrega</h3>
+                        <form id="checkout-form" class="space-y-4">
+                            <input type="text" id="customer-name" placeholder="O seu Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                            <input type="text" id="customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                            <textarea id="order-instructions" placeholder="Instruções (ex: troco para 50)" class="w-full p-2 border dark:border-gray-600 rounded h-20 bg-gray-100 dark:bg-gray-700"></textarea>
+                            
+                            <h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3>
+                            <div class="flex gap-4">
+                                <button type="button" data-payment="delivery" class="payment-btn flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Pagar na Entrega</button>
+                                <button type="button" data-payment="online" class="payment-btn flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg">Pagar Online</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
-
-
-    <!-- Modal do Carrinho -->
-    <div id="cart-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="modal-backdrop fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4 z-10 flex flex-col" style="height: 90vh; max-height: 600px;">
-            <div class="p-6 border-b flex justify-between items-center">
-                <h3 class="text-xl font-bold">O seu Carrinho</h3>
-                <button id="close-cart-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
-            </div>
-            <div id="cart-items" class="p-6 space-y-4 overflow-y-auto flex-grow">
-                <!-- Itens do carrinho serão inseridos aqui -->
-            </div>
-            <div class="p-6 border-t bg-gray-50">
-                <div class="flex justify-between items-center font-bold text-lg mb-4">
-                    <span>Total</span>
-                    <span id="cart-total">R$ 0,00</span>
-                </div>
-                <button id="checkout-btn" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400">
-                    Finalizar Pedido
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal de Checkout -->
-    <div id="checkout-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="modal-backdrop fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-md m-4 z-10">
-            <form id="checkout-form" class="p-6">
-                <h3 class="text-xl font-bold mb-6">Informações para Entrega</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label for="customer-name" class="block text-sm font-medium text-gray-600 mb-1">O seu Nome</label>
-                        <input type="text" id="customer-name" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
-                    </div>
-                    <div>
-                        <label for="customer-address" class="block text-sm font-medium text-gray-600 mb-1">Endereço de Entrega</label>
-                        <input type="text" id="customer-address" class="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg" required>
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-3 mt-8">
-                    <button type="button" id="cancel-checkout-btn" class="px-6 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300">Cancelar</button>
-                    <button type="submit" id="confirm-order-btn" class="px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-semibold">Confirmar Pedido</button>
-                </div>
-            </form>
-        </div>
-    </div>
     
     <!-- Modal de Sucesso -->
-    <div id="success-modal" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="modal-backdrop fixed inset-0"></div>
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm m-4 z-10 text-center p-8">
+    <div id="success-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm m-4 text-center p-8">
             <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                 <i class="fa-solid fa-check fa-2x text-green-600"></i>
             </div>
-            <h3 class="text-xl font-bold mb-2">Pedido Enviado!</h3>
-            <p class="text-gray-600 mb-6">O seu pedido foi recebido e já está a ser preparado. Obrigado!</p>
+            <h3 class="text-xl font-bold mb-2">Pedido Recebido!</h3>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">O seu pedido foi enviado com sucesso.</p>
             <button id="close-success-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Fechar</button>
         </div>
     </div>
@@ -103,27 +146,26 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("DOM carregado. A iniciar script da loja.");
-
             // --- ELEMENTOS DO DOM ---
             const appLoader = document.getElementById('app-loader');
             const appContent = document.getElementById('app-content');
             const productsGrid = document.getElementById('products-grid');
-            const cartButton = document.getElementById('cart-button');
-            const cartModal = document.getElementById('cart-modal');
-            const closeCartBtn = document.getElementById('close-cart-btn');
+            const upsellGrid = document.getElementById('upsell-grid');
+            const categoriesNav = document.getElementById('categories-nav');
             const cartItemsEl = document.getElementById('cart-items');
-            const cartCountEl = document.getElementById('cart-count');
+            const cartSubtotalEl = document.getElementById('cart-subtotal');
+            const cartDiscountEl = document.getElementById('cart-discount');
             const cartTotalEl = document.getElementById('cart-total');
-            const checkoutBtn = document.getElementById('checkout-btn');
-            const checkoutModal = document.getElementById('checkout-modal');
+            const couponForm = document.getElementById('coupon-form');
+            const couponMessageEl = document.getElementById('coupon-message');
             const checkoutForm = document.getElementById('checkout-form');
-            const cancelCheckoutBtn = document.getElementById('cancel-checkout-btn');
             const successModal = document.getElementById('success-modal');
             const closeSuccessBtn = document.getElementById('close-success-btn');
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.getElementById('theme-icon');
 
             // --- CONFIGURAÇÃO DO FIREBASE ---
             const firebaseConfig = {
@@ -136,89 +178,134 @@
             };
 
             // --- ESTADO DA APLICAÇÃO ---
-            let products = [];
+            let allProducts = [];
             let cart = [];
+            let appliedCoupon = null;
 
             // --- INICIALIZAÇÃO ---
             try {
                 const app = initializeApp(firebaseConfig);
                 const db = getFirestore(app);
                 const auth = getAuth(app);
-                console.log("Firebase inicializado com sucesso.");
+
+                // --- LÓGICA DO TEMA ---
+                const updateThemeIcon = () => {
+                    if (document.documentElement.classList.contains('dark')) {
+                        themeIcon.classList.remove('fa-moon');
+                        themeIcon.classList.add('fa-sun');
+                    } else {
+                        themeIcon.classList.remove('fa-sun');
+                        themeIcon.classList.add('fa-moon');
+                    }
+                };
+                themeToggle.addEventListener('click', () => {
+                    document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+                    updateThemeIcon();
+                });
+                updateThemeIcon();
+
 
                 // --- FUNÇÕES DE RENDERIZAÇÃO ---
-                const renderProducts = () => {
-                    if (products.length === 0) {
-                        productsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500">Nenhum produto disponível no momento.</p>`;
-                    } else {
-                        productsGrid.innerHTML = products.map(product => `
-                            <div class="product-card bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300">
-                                <img src="${product.imageUrl || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=Bebida'}" alt="${product.name}" class="w-full h-48 object-cover">
-                                <div class="p-4">
-                                    <h3 class="text-lg font-bold truncate">${product.name}</h3>
-                                    <p class="text-sm text-gray-500 mb-2">Stock: ${product.stock}</p>
-                                    <div class="flex justify-between items-center">
-                                        <p class="text-xl font-extrabold text-blue-600">R$ ${product.price.toFixed(2)}</p>
-                                        <button class="add-to-cart-btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-400" data-id="${product.id}" ${product.stock === 0 ? 'disabled' : ''}>
-                                            ${product.stock === 0 ? 'Esgotado' : '<i class="fa-solid fa-plus"></i>'}
-                                        </button>
-                                    </div>
-                                </div>
+                const createProductCard = (product) => `
+                    <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col">
+                        <img src="${product.imageUrl || 'https://placehold.co/300x200/e2e8f0/e2e8f0?text=Bebida'}" alt="${product.name}" class="w-full h-40 object-cover">
+                        <div class="p-4 flex flex-col flex-grow">
+                            <h3 class="text-md font-bold flex-grow">${product.name}</h3>
+                            <div class="flex justify-between items-center mt-4">
+                                <p class="text-lg font-extrabold text-blue-600 dark:text-blue-400">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
+                                <button class="add-to-cart-btn bg-blue-600 text-white rounded-full h-10 w-10 flex items-center justify-center hover:bg-blue-700" data-id="${product.id}">
+                                    <i class="fa-solid fa-plus"></i>
+                                </button>
                             </div>
-                        `).join('');
+                        </div>
+                    </div>
+                `;
+
+                const renderProducts = (category = 'Todos') => {
+                    const mainProducts = allProducts.filter(p => p.category !== 'Para Acompanhar');
+                    const upsellProducts = allProducts.filter(p => p.category === 'Para Acompanhar');
+                    
+                    const filteredProducts = category === 'Todos' 
+                        ? mainProducts 
+                        : mainProducts.filter(p => p.category === category);
+
+                    if (filteredProducts.length === 0) {
+                        productsGrid.innerHTML = `<p class="col-span-full text-center text-gray-500 dark:text-gray-400">Nenhum produto encontrado nesta categoria.</p>`;
+                    } else {
+                        productsGrid.innerHTML = filteredProducts.map(createProductCard).join('');
                     }
+
+                    if(upsellProducts.length > 0) {
+                        upsellGrid.innerHTML = upsellProducts.map(createProductCard).join('');
+                        document.getElementById('upsell-section').classList.remove('hidden');
+                    } else {
+                        document.getElementById('upsell-section').classList.add('hidden');
+                    }
+
                     attachProductListeners();
-                    appLoader.classList.add('hidden');
-                    appContent.classList.remove('hidden');
+                };
+
+                const renderCategories = () => {
+                    const mainCategories = allProducts
+                        .filter(p => p.category !== 'Para Acompanhar')
+                        .map(p => p.category);
+                    const categories = ['Todos', ...new Set(mainCategories)];
+                    
+                    categoriesNav.innerHTML = categories.map(cat => `
+                        <button class="category-btn text-sm font-semibold px-4 py-2 rounded-full" data-category="${cat}">${cat}</button>
+                    `).join('');
+                    
+                    const firstButton = categoriesNav.querySelector('button');
+                    if (firstButton) firstButton.classList.add('category-btn-active');
+                    
+                    attachCategoryListeners();
                 };
 
                 const renderCart = () => {
                     if (cart.length === 0) {
-                        cartItemsEl.innerHTML = `<p class="text-gray-500 text-center">O seu carrinho está vazio.</p>`;
-                        checkoutBtn.disabled = true;
+                        cartItemsEl.innerHTML = `<p class="text-gray-500 dark:text-gray-400">O seu carrinho está vazio.</p>`;
                     } else {
                         cartItemsEl.innerHTML = cart.map(item => `
                             <div class="flex items-center justify-between" data-id="${item.id}">
-                                <div class="flex items-center gap-3">
-                                    <img src="${item.imageUrl || 'https://placehold.co/40x40'}" class="w-12 h-12 rounded-md object-cover">
-                                    <div>
-                                        <p class="font-semibold">${item.name}</p>
-                                        <p class="text-sm text-gray-600">R$ ${item.price.toFixed(2)}</p>
-                                    </div>
+                                <div>
+                                    <p class="font-semibold">${item.name}</p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">R$ ${item.price.toFixed(2).replace('.', ',')}</p>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button class="cart-quantity-btn" data-action="decrease">-</button>
+                                    <button class="cart-quantity-btn text-lg hover:text-blue-500" data-action="decrease">-</button>
                                     <span>${item.quantity}</span>
-                                    <button class="cart-quantity-btn" data-action="increase">+</button>
-                                    <button class="cart-remove-btn text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+                                    <button class="cart-quantity-btn text-lg hover:text-blue-500" data-action="increase">+</button>
                                 </div>
                             </div>
                         `).join('');
-                        checkoutBtn.disabled = false;
                     }
                     
-                    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                    cartTotalEl.textContent = `R$ ${total.toFixed(2)}`;
+                    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                    let discount = 0;
+                    if (appliedCoupon) {
+                        if (appliedCoupon.type === 'fixed') {
+                            discount = appliedCoupon.value;
+                        } else if (appliedCoupon.type === 'percentage') {
+                            discount = (subtotal * appliedCoupon.value) / 100;
+                        }
+                    }
+                    const total = Math.max(0, subtotal - discount);
 
-                    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-                    cartCountEl.textContent = count;
-                    cartCountEl.classList.toggle('hidden', count === 0);
+                    cartSubtotalEl.textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+                    cartDiscountEl.textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
+                    cartTotalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
                     
                     attachCartListeners();
                 };
 
-                // --- LÓGICA DO CARRINHO ---
+                // --- LÓGICA DO CARRINHO E CUPONS ---
                 const addToCart = (productId) => {
-                    const product = products.find(p => p.id === productId);
-                    if (!product || product.stock === 0) return;
-
+                    const product = allProducts.find(p => p.id === productId);
+                    if (!product) return;
                     const cartItem = cart.find(item => item.id === productId);
                     if (cartItem) {
-                        if (cartItem.quantity < product.stock) {
-                            cartItem.quantity++;
-                        } else {
-                            alert('Quantidade máxima em stock atingida.');
-                        }
+                        cartItem.quantity++;
                     } else {
                         cart.push({ ...product, quantity: 1 });
                     }
@@ -228,14 +315,8 @@
                 const updateCartQuantity = (productId, action) => {
                     const cartItem = cart.find(item => item.id === productId);
                     if (!cartItem) return;
-
                     if (action === 'increase') {
-                        const product = products.find(p => p.id === productId);
-                        if (cartItem.quantity < product.stock) {
-                            cartItem.quantity++;
-                        } else {
-                            alert('Quantidade máxima em stock atingida.');
-                        }
+                        cartItem.quantity++;
                     } else if (action === 'decrease') {
                         cartItem.quantity--;
                         if (cartItem.quantity === 0) {
@@ -244,41 +325,64 @@
                     }
                     renderCart();
                 };
+                
+                couponForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+                    if (!code) return;
 
-                const removeFromCart = (productId) => {
-                    cart = cart.filter(item => item.id !== productId);
+                    const couponRef = doc(db, "coupons", code);
+                    const couponSnap = await getDoc(couponRef);
+
+                    if (couponSnap.exists() && couponSnap.data().active) {
+                        appliedCoupon = { id: couponSnap.id, ...couponSnap.data() };
+                        couponMessageEl.textContent = `Cupom "${code}" aplicado com sucesso!`;
+                        couponMessageEl.className = 'text-sm mt-2 text-green-600';
+                    } else {
+                        appliedCoupon = null;
+                        couponMessageEl.textContent = 'Cupom inválido ou expirado.';
+                        couponMessageEl.className = 'text-sm mt-2 text-red-600';
+                    }
                     renderCart();
-                };
+                });
 
-                // --- LISTENERS DO FIREBASE & AUTH ---
+                // --- LISTENERS ---
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        console.log("Utilizador anónimo autenticado:", user.uid);
                         onSnapshot(collection(db, "products"), (snapshot) => {
-                            products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                            renderCategories();
                             renderProducts();
+                            appLoader.classList.add('hidden');
+                            appContent.classList.remove('hidden');
                         }, (error) => {
                             console.error("Erro ao obter produtos:", error);
-                            productsGrid.innerHTML = `<p class="col-span-full text-center text-red-500">Não foi possível carregar os produtos. Verifique as regras do Firestore.</p>`;
+                            appLoader.innerHTML = `<p class="text-red-500">Não foi possível carregar os produtos.</p>`;
                         });
                     }
                 });
 
                 signInAnonymously(auth).catch((error) => {
                     console.error("Falha no login anónimo:", error);
-                    appLoader.innerHTML = `<div class="p-4 bg-red-100 text-red-800 text-center">
-                        <p class="font-bold">Erro ao conectar com o servidor.</p>
-                        <p class="text-sm">Tente recarregar a página.</p>
-                    </div>`;
+                    appLoader.innerHTML = `<p class="text-red-500">Erro ao conectar com o servidor.</p>`;
                 });
 
-                // --- MANIPULADORES DE EVENTOS ---
                 function attachProductListeners() {
                     document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
                         btn.addEventListener('click', () => addToCart(btn.dataset.id));
                     });
                 }
                 
+                function attachCategoryListeners() {
+                    document.querySelectorAll('.category-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('category-btn-active'));
+                            btn.classList.add('category-btn-active');
+                            renderProducts(btn.dataset.category);
+                        });
+                    });
+                }
+
                 function attachCartListeners() {
                     document.querySelectorAll('.cart-quantity-btn').forEach(btn => {
                         btn.addEventListener('click', () => {
@@ -286,71 +390,68 @@
                             updateCartQuantity(productId, btn.dataset.action);
                         });
                     });
-                    document.querySelectorAll('.cart-remove-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
-                            const productId = btn.closest('[data-id]').dataset.id;
-                            removeFromCart(productId);
-                        });
-                    });
                 }
                 
-                // Modal do Carrinho
-                cartButton.addEventListener('click', () => cartModal.classList.remove('hidden'));
-                closeCartBtn.addEventListener('click', () => cartModal.classList.add('hidden'));
-                cartModal.querySelector('.modal-backdrop').addEventListener('click', () => cartModal.classList.add('hidden'));
-                
-                // Modal de Checkout
-                checkoutBtn.addEventListener('click', () => {
-                    cartModal.classList.add('hidden');
-                    checkoutModal.classList.remove('hidden');
-                });
-                cancelCheckoutBtn.addEventListener('click', () => checkoutModal.classList.add('hidden'));
-                checkoutModal.querySelector('.modal-backdrop').addEventListener('click', () => checkoutModal.classList.add('hidden'));
-
-                // Finalizar Pedido
-                checkoutForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const orderData = {
-                        customerName: document.getElementById('customer-name').value,
-                        customerAddress: document.getElementById('customer-address').value,
-                        items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
-                        total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-                        status: 'Recebido',
-                        createdAt: serverTimestamp()
-                    };
-
-                    try {
-                        const confirmBtn = document.getElementById('confirm-order-btn');
-                        confirmBtn.disabled = true;
-                        confirmBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> A enviar...';
+                document.querySelectorAll('.payment-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        if (cart.length === 0) {
+                            alert("O seu carrinho está vazio.");
+                            return;
+                        }
                         
-                        await addDoc(collection(db, "orders"), orderData);
-                        
-                        checkoutForm.reset();
-                        cart = [];
-                        renderCart();
+                        const isFormValid = checkoutForm.checkValidity();
+                        if (!isFormValid) {
+                            checkoutForm.reportValidity();
+                            return;
+                        }
 
-                        checkoutModal.classList.add('hidden');
-                        successModal.classList.remove('hidden');
+                        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                        let discount = 0;
+                        if (appliedCoupon) {
+                           if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
+                           else if (appliedCoupon.type === 'percentage') discount = (subtotal * appliedCoupon.value) / 100;
+                        }
+                        const total = Math.max(0, subtotal - discount);
 
-                    } catch (error) {
-                        console.error("Erro ao enviar pedido: ", error);
-                        alert("Ocorreu um erro ao enviar o seu pedido. Tente novamente.");
-                    } finally {
-                         const confirmBtn = document.getElementById('confirm-order-btn');
-                         confirmBtn.disabled = false;
-                         confirmBtn.textContent = 'Confirmar Pedido';
-                    }
+                        const orderData = {
+                            customerName: document.getElementById('customer-name').value,
+                            customerAddress: document.getElementById('customer-address').value,
+                            instructions: document.getElementById('order-instructions').value,
+                            items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+                            subtotal,
+                            discount,
+                            total,
+                            coupon: appliedCoupon ? { code: appliedCoupon.id, discount: discount } : null,
+                            paymentMethod: e.target.dataset.payment,
+                            status: 'pending',
+                            createdAt: serverTimestamp()
+                        };
+
+                        try {
+                            await addDoc(collection(db, "orders"), orderData);
+                            checkoutForm.reset();
+                            couponForm.reset();
+                            cart = [];
+                            appliedCoupon = null;
+                            couponMessageEl.textContent = '';
+                            renderCart();
+                            successModal.classList.remove('hidden');
+                            successModal.classList.add('flex');
+                        } catch (error) {
+                            console.error("Erro ao enviar pedido: ", error);
+                            alert("Ocorreu um erro ao enviar o seu pedido.");
+                        }
+                    });
                 });
                 
-                closeSuccessBtn.addEventListener('click', () => successModal.classList.add('hidden'));
+                closeSuccessBtn.addEventListener('click', () => {
+                    successModal.classList.add('hidden');
+                    successModal.classList.remove('flex');
+                });
 
             } catch (e) {
                 console.error("Erro fatal na inicialização do Firebase:", e);
-                appLoader.innerHTML = `<div class="p-4 bg-red-100 text-red-800 text-center">
-                    <p class="font-bold">Erro crítico na configuração do Firebase.</p>
-                    <p class="text-sm">Verifique a consola para mais detalhes (F12).</p>
-                </div>`;
+                appLoader.innerHTML = `<p class="text-red-500">Erro crítico na configuração do Firebase.</p>`;
             }
         });
     </script>
