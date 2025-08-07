@@ -11,8 +11,16 @@
         body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
         .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
         .hidden { display: none; }
-        .tab-active { border-color: #3b82f6; color: #3b82f6; }
+        .tab-active { border-color: #3b82f6; color: #3b82f6; font-weight: 600; }
         .tab-inactive { border-color: transparent; color: #6b7280; }
+        
+        @keyframes pulse-bg {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: #dbeafe; } /* blue-100 */
+        }
+        .new-order-notify {
+            animation: pulse-bg 1.5s infinite;
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -52,10 +60,11 @@
             <!-- Abas de Navegação -->
             <div class="border-b border-gray-200 mb-6">
                 <nav class="flex space-x-6" aria-label="Tabs">
-                    <button class="tab-btn tab-active" data-tab="orders">
+                    <button class="tab-btn tab-active py-2 px-1 text-sm font-medium" data-tab="orders">
                         <i class="fa-solid fa-receipt mr-2"></i>Pedidos
+                        <span id="new-order-badge" class="hidden ml-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">NOVO</span>
                     </button>
-                    <button class="tab-btn tab-inactive" data-tab="products">
+                    <button class="tab-btn tab-inactive py-2 px-1 text-sm font-medium" data-tab="products">
                         <i class="fa-solid fa-box-archive mr-2"></i>Produtos
                     </button>
                 </nav>
@@ -162,10 +171,12 @@
         const cancelProductBtn = document.getElementById('cancel-product-btn');
         const addProductBtn = document.getElementById('add-product-btn');
         const modalTitle = document.getElementById('modal-title');
+        const newOrderBadge = document.getElementById('new-order-badge');
         
         // --- NAVEGAÇÃO POR ABAS ---
         const tabButtons = document.querySelectorAll('.tab-btn');
         const tabContents = document.querySelectorAll('.tab-content');
+        const originalTitle = document.title;
 
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
@@ -173,7 +184,12 @@
                 button.classList.replace('tab-inactive', 'tab-active');
                 
                 tabContents.forEach(content => content.classList.add('hidden'));
-                document.getElementById(`${button.dataset.tab}-tab`).classList.remove('hidden');
+                const tabId = button.dataset.tab;
+                document.getElementById(`${tabId}-tab`).classList.remove('hidden');
+
+                if (tabId === 'orders') {
+                    clearOrderNotification();
+                }
             });
         });
 
@@ -264,10 +280,44 @@
             attachOrderActionListeners();
         };
 
+        // --- NOTIFICAÇÕES ---
+        const showOrderNotification = () => {
+            document.title = '(!) Novo Pedido!';
+            newOrderBadge.classList.remove('hidden');
+            const ordersTabButton = document.querySelector('button[data-tab="orders"]');
+            ordersTabButton.classList.add('new-order-notify');
+            
+            // Tocar um som simples
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+            } catch(e) {
+                console.warn("Não foi possível tocar o som de notificação.", e);
+            }
+        };
+
+        const clearOrderNotification = () => {
+            document.title = originalTitle;
+            newOrderBadge.classList.add('hidden');
+            const ordersTabButton = document.querySelector('button[data-tab="orders"]');
+            ordersTabButton.classList.remove('new-order-notify');
+        };
+
         // --- LISTENERS DO FIREBASE ---
         let productsUnsubscribe = null;
         let ordersUnsubscribe = null;
         let productsCache = [];
+        let ordersCache = [];
+        let isFirstOrderLoad = true;
 
         function initListeners() {
             if (productsUnsubscribe) productsUnsubscribe();
@@ -278,9 +328,16 @@
 
             if (ordersUnsubscribe) ordersUnsubscribe();
             ordersUnsubscribe = onSnapshot(collection(db, "orders"), (snapshot) => {
-                const orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                orders.sort((a, b) => b.createdAt - a.createdAt); // Mais recentes primeiro
-                renderOrders(orders);
+                const newOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                newOrders.sort((a, b) => b.createdAt - a.createdAt); // Mais recentes primeiro
+                
+                if (!isFirstOrderLoad && newOrders.length > ordersCache.length) {
+                    showOrderNotification();
+                }
+
+                ordersCache = newOrders;
+                isFirstOrderLoad = false;
+                renderOrders(ordersCache);
             });
         }
 
