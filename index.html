@@ -3,34 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SI Delivery</title>
+    <title>SI Delivery - Conveniência Santa Isabel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200 transition-colors duration-300">
 
-    <!-- App do Cliente (Padrão) -->
-    <div id="customer-app">
-        <!-- O HTML completo da loja do cliente vai aqui... -->
+    <!-- Container Principal -->
+    <div class="container mx-auto p-4 max-w-7xl">
+
+        <!-- Cabeçalho -->
+        <header class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-blue-500 text-white p-3 rounded-full">
+                    <!-- LOGO APLICADA AQUI -->
+                    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8">
+                        <g transform="rotate(-45 50 50) translate(0, 5)">
+                            <path d="M 50,10 L 70,40 L 60,45 L 60,70 L 40,70 L 40,45 L 30,40 Z" fill="white"/>
+                            <path d="M 50,70 L 40,90 L 60,90 Z" fill="#F59E0B"/>
+                            <circle cx="50" cy="30" r="8" fill="#60A5FA"/>
+                        </g>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">SI Delivery</h1>
+                    <p class="text-gray-500 dark:text-gray-400">Conveniência Santa Isabel</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div id="auth-info" class="text-xs text-gray-400">Carregando...</div>
+                <button id="theme-toggle" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5">
+                    <i id="theme-toggle-dark-icon" class="fas fa-moon text-lg hidden"></i>
+                    <i id="theme-toggle-light-icon" class="fas fa-sun text-lg hidden"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Coluna da Esquerda (Cardápio e Abas) -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Cardápio -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                         <h2 class="text-xl font-bold">Nosso Cardápio</h2>
+                         <div class="w-1/2">
+                            <input type="text" id="search-bar" placeholder="🔎 Procurar produto..." class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 transition bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                         </div>
+                    </div>
+                    <div id="product-list" class="space-y-6 min-h-[200px]">
+                        <div class="text-center py-10">
+                            <i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i>
+                            <p class="mt-4 text-gray-500 dark:text-gray-400">Aguardando produtos...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abas -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
+                    <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto scrollbar-hide">
+                        <button id="tab-upsell" class="tab-btn py-2 px-4 font-semibold border-b-2 whitespace-nowrap border-blue-500 text-blue-600 bg-blue-50 dark:bg-gray-700 dark:text-white">Que tal adicionar?</button>
+                        <button id="tab-reorder" class="tab-btn py-2 px-4 font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 whitespace-nowrap">Peça de Novo</button>
+                        <button id="tab-my-orders" class="tab-btn py-2 px-4 font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 whitespace-nowrap">Meus Pedidos</button>
+                    </div>
+                    <div id="panel-upsell"><div id="upsell-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>
+                    <div id="panel-reorder" class="hidden"><div id="reorder-list" class="space-y-4"></div></div>
+                    <div id="panel-my-orders" class="hidden"><div id="my-orders-list" class="space-y-4"></div></div>
+                </div>
+            </div>
+
+            <!-- Coluna do Carrinho -->
+            <aside class="lg:col-span-1">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-4">
+                    <h2 class="text-xl font-bold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center"><i class="fas fa-shopping-cart mr-2"></i>Seu Pedido</h2>
+                    <div id="cart-items" class="space-y-4 max-h-60 overflow-y-auto scrollbar-hide">
+                        <p id="empty-cart-message" class="text-gray-500 dark:text-gray-400 text-center py-4">Seu carrinho está vazio.</p>
+                    </div>
+                    <div id="cart-summary" class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 hidden">
+                        <!-- Cupom -->
+                        <div class="flex space-x-2 mb-4">
+                            <input type="text" id="coupon-code" placeholder="Cupom de desconto" class="w-full p-2 border rounded-md bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                            <button id="apply-coupon-btn" class="bg-gray-700 text-white px-4 rounded-md hover:bg-black dark:bg-gray-600 dark:hover:bg-gray-500">Aplicar</button>
+                        </div>
+                        <div id="coupon-feedback" class="text-sm mb-4"></div>
+                        
+                        <!-- Total -->
+                        <div id="total-calculation">
+                            <div class="flex justify-between text-gray-600 dark:text-gray-300"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div>
+                            <div class="flex justify-between text-red-600"><span>Desconto</span><span id="cart-discount">- R$ 0,00</span></div>
+                            <div class="flex justify-between font-bold text-lg mt-2"><span>Total</span><span id="cart-total">R$ 0,00</span></div>
+                        </div>
+
+                        <!-- Formulário -->
+                        <div id="customer-info-form">
+                             <h3 class="font-bold mt-6 mb-2">Informações para Entrega</h3>
+                            <input type="text" id="customer-name" placeholder="Seu nome" class="w-full p-2 border rounded-md mb-2 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                            <input type="text" id="customer-address" placeholder="Seu endereço completo" class="w-full p-2 border rounded-md mb-2 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                            <textarea id="delivery-instructions" placeholder="Instruções para o entregador (opcional)" class="w-full p-2 border rounded-md mb-2 h-16 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"></textarea>
+                            <button id="continue-to-payment-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Continuar</button>
+                        </div>
+                        <div id="payment-options" class="hidden mt-4">
+                            <h3 class="font-bold mt-6 mb-2">Forma de Pagamento</h3>
+                            <div class="space-y-3">
+                                <button id="pay-on-delivery-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white font-bold py-3 rounded-lg">Pagar na Entrega</button>
+                                <button id="pay-with-stripe-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg"><i class="fab fa-stripe-s mr-2"></i>Pagar Online</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </main>
     </div>
 
-    <!-- Painel de Administração (Escondido por padrão) -->
-    <div id="admin-panel" class="hidden">
-        <!-- O HTML completo do painel de administração vai aqui... -->
+    <!-- Modal de Confirmação -->
+    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 text-center max-w-sm mx-4">
+            <div class="text-green-500 mb-4"><i class="fas fa-check-circle fa-4x"></i></div>
+            <h3 class="text-2xl font-bold mb-2">Pedido Recebido!</h3>
+            <p class="text-gray-600 dark:text-gray-300">Seu pedido foi enviado com sucesso. Acompanhe o status na aba "Meus Pedidos".</p>
+            <button onclick="closeModal()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Fechar</button>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, getDocs, addDoc, onSnapshot, query, where, doc, getDoc, updateDoc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, onSnapshot, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // --- SUBSTITUA PELA CONFIGURAÇÃO DO SEU NOVO PROJETO FIREBASE ---
+        // --- CONFIGURAÇÃO DO SEU NOVO PROJETO FIREBASE ---
         const firebaseConfig = {
           apiKey: "AIzaSyANoJEYMuy5ZgkEvKg1LXqAfygme3XFo9Y",
           authDomain: "sideliveryappnovo.firebaseapp.com",
@@ -41,503 +150,244 @@
           measurementId: "G-0S42S6E1R5"
         };
 
-        // --- INICIALIZAÇÃO ---
+        // --- INICIALIZAÇÃO DO FIREBASE ---
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- LÓGICA DE TEMA (MODO CLARO/ESCURO) ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
+        const themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleLightIcon.classList.remove('hidden');
+                themeToggleDarkIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleDarkIcon.classList.remove('hidden');
+                themeToggleLightIcon.classList.add('hidden');
+                localStorage.setItem('color-theme', 'light');
+            }
+        }
+
+        const initialTheme = localStorage.getItem('color-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyTheme(initialTheme);
+
+        themeToggleBtn.addEventListener('click', function() {
+            const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+            applyTheme(newTheme);
+        });
+
+        // --- O restante do código JavaScript (carrinho, etc.) ---
         const productsCollection = collection(db, "products");
         const ordersCollection = collection(db, "orders");
         const couponsCollection = collection(db, "coupons");
 
-        // --- LÓGICA PARA MOSTRAR A LOJA OU O PAINEL ---
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdminMode = urlParams.get('admin') === 'true';
+        let cart = {};
+        let userId = null;
+        let allProducts = [];
+        let appliedCoupon = null;
+        
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                userId = user.uid;
+                document.getElementById('auth-info').textContent = `ID Cliente: ${userId.substring(0, 8)}...`;
+                setupApp();
+            } else {
+                try {
+                    await signInAnonymously(auth);
+                } catch (error) {
+                    console.error("Authentication error:", error);
+                    document.getElementById('auth-info').textContent = 'Erro de conexão.';
+                }
+            }
+        });
 
-        if (isAdminMode) {
-            document.getElementById('admin-panel').classList.remove('hidden');
-            document.getElementById('customer-app').classList.add('hidden');
-            document.title = "Painel de Admin - SI Delivery";
-            initializeAdminPanel();
-        } else {
-            document.getElementById('customer-app').classList.remove('hidden');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.title = "SI Delivery - Conveniência Santa Isabel";
-            initializeCustomerApp();
+        async function setupApp() {
+            listenToProducts();
+            loadUserOrders();
+            setupUIListeners();
         }
 
-        // --- CÓDIGO DO PAINEL DE ADMINISTRAÇÃO ---
-        function initializeAdminPanel() {
-            const adminPanelContainer = document.getElementById('admin-panel');
-            adminPanelContainer.innerHTML = `
-                <div class="flex h-screen bg-gray-200">
-                    <div class="w-64 bg-gray-800 text-white p-5 flex flex-col">
-                        <h1 class="text-2xl font-bold mb-10">Admin SI Delivery</h1>
-                        <nav>
-                            <a href="#orders" class="block py-2.5 px-4 rounded hover:bg-gray-700">Pedidos</a>
-                            <a href="#products" class="block py-2.5 px-4 rounded hover:bg-gray-700">Produtos</a>
-                            <a href="#coupons" class="block py-2.5 px-4 rounded hover:bg-gray-700">Cupons</a>
-                        </nav>
-                        <div id="auth-info-admin" class="text-xs text-gray-400 mt-auto">Carregando...</div>
-                    </div>
-                    <div class="flex-1 flex flex-col overflow-hidden">
-                        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                            <section id="orders"><h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2><div id="orders-list" class="space-y-4"></div></section>
-                            <hr class="my-8">
-                            <section id="products"><h2 class="text-2xl font-semibold mb-4">Gerenciar Produtos</h2><div class="bg-white p-6 rounded-lg shadow-md"><h3 id="form-title" class="text-xl font-bold mb-4">Adicionar Novo Produto</h3><form id="product-form" class="space-y-4"><input type="hidden" id="product-id"><input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-2 border rounded" required><input type="number" id="product-price" placeholder="Preço (ex: 5.50)" step="0.01" class="w-full p-2 border rounded" required><select id="product-category" class="w-full p-2 border rounded" required><option value="">Selecione a Categoria</option><option value="Cervejas">Cervejas</option><option value="Destilados">Destilados</option><option value="Vinhos">Vinhos</option><option value="Não Alcoólicos">Não Alcoólicos</option><option value="Complementos">Complementos</option></select><input type="text" id="product-image-url" placeholder="URL da Imagem" class="w-full p-2 border rounded"><div class="flex space-x-2"><button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar Produto</button><button type="button" id="cancel-edit-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400 hidden">Cancelar Edição</button></div></form></div><div class="mt-8"><h3 class="text-xl font-bold mb-4">Produtos Cadastrados</h3><div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div></div></section>
-                            <hr class="my-8">
-                            <section id="coupons"><h2 class="text-2xl font-semibold mb-4">Gerenciar Cupons</h2><div class="bg-white p-6 rounded-lg shadow-md"><h3 id="coupon-form-title" class="text-xl font-bold mb-4">Criar Novo Cupom</h3><form id="coupon-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"><input type="text" id="coupon-code-admin" placeholder="Código (ex: BEMVINDO10)" class="p-2 border rounded uppercase" required><select id="coupon-type-admin" class="p-2 border rounded" required><option value="percentage">Porcentagem (%)</option><option value="fixed">Valor Fixo (R$)</option></select><input type="number" id="coupon-value-admin" placeholder="Valor" step="0.01" class="w-full p-2 border rounded" required><button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar Cupom</button></form></div><div class="mt-8"><h3 class="text-xl font-bold mb-4">Cupons Ativos</h3><div id="coupons-list" class="space-y-2"></div></div></section>
-                        </main>
-                    </div>
-                </div>
-            `;
+        function setupUIListeners() {
+            document.getElementById('search-bar').addEventListener('input', (e) => renderProducts(allProducts, e.target.value));
+            document.getElementById('apply-coupon-btn').addEventListener('click', applyCoupon);
+            document.getElementById('continue-to-payment-btn').addEventListener('click', showPaymentOptions);
+            document.getElementById('pay-on-delivery-btn').addEventListener('click', () => placeOrder('on_delivery'));
+            document.getElementById('pay-with-stripe-btn').addEventListener('click', () => placeOrder('stripe'));
 
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    document.getElementById('auth-info-admin').textContent = `Admin Conectado`;
-                    await addSampleProductsIfNeeded();
-                    listenToOrders();
-                    listenToProductsAdmin();
-                    listenToCoupons();
-                } else {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Admin auth error:", error);
-                        document.getElementById('auth-info-admin').textContent = `Falha na autenticação.`;
-                    }
-                }
-            });
-
-            async function addSampleProductsIfNeeded() {
-                const q = query(productsCollection);
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) {
-                    const sampleProducts = [
-                        { name: 'Cerveja Brahma 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/100x100/F44336/FFFFFF?text=Brahma' },
-                        { name: 'Cerveja Skol 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/100x100/FFC107/FFFFFF?text=Skol' },
-                        { name: 'Cerveja Heineken 330ml', price: 5.50, category: 'Cervejas', imageUrl: 'https://placehold.co/100x100/4CAF50/FFFFFF?text=Heineken' },
-                        { name: 'Gin Tanqueray 750ml', price: 99.90, category: 'Destilados', imageUrl: 'https://placehold.co/100x100/009688/FFFFFF?text=Gin' },
-                        { name: 'Vodka Absolut 750ml', price: 89.90, category: 'Destilados', imageUrl: 'https://placehold.co/100x100/03A9F4/FFFFFF?text=Vodka' },
-                        { name: 'Whisky Red Label 750ml', price: 85.00, category: 'Destilados', imageUrl: 'https://placehold.co/100x100/E53935/FFFFFF?text=Whisky' },
-                        { name: 'Vinho Casillero del Diablo 750ml', price: 55.00, category: 'Vinhos', imageUrl: 'https://placehold.co/100x100/880E4F/FFFFFF?text=Vinho' },
-                        { name: 'Coca-Cola 2L', price: 9.00, category: 'Não Alcoólicos', imageUrl: 'https://placehold.co/100x100/f44336/FFFFFF?text=Coca' },
-                        { name: 'Guaraná Antarctica 2L', price: 8.50, category: 'Não Alcoólicos', imageUrl: 'https://placehold.co/100x100/4CAF50/FFFFFF?text=Guaraná' },
-                        { name: 'Água Mineral 500ml', price: 2.50, category: 'Não Alcoólicos', imageUrl: 'https://placehold.co/100x100/2196F3/FFFFFF?text=Água' },
-                        { name: 'Gelo em Cubo 5kg', price: 10.00, category: 'Complementos', imageUrl: 'https://placehold.co/100x100/E0F7FA/000000?text=Gelo' },
-                        { name: 'Carvão 3kg', price: 15.00, category: 'Complementos', imageUrl: 'https://placehold.co/100x100/616161/FFFFFF?text=Carvão' },
-                    ];
-                    for (const product of sampleProducts) {
-                        await addDoc(productsCollection, product);
-                    }
-                }
-            }
+            const tabs = { upsell: 'panel-upsell', reorder: 'panel-reorder', 'my-orders': 'panel-my-orders' };
+            const activeTabClasses = ['border-blue-500', 'text-blue-600', 'bg-blue-50', 'dark:bg-gray-700', 'dark:text-white'];
             
-            function listenToOrders() {
-                const q = query(ordersCollection);
-                onSnapshot(q, (snapshot) => {
-                    const ordersList = document.getElementById('orders-list');
-                    if (snapshot.empty) {
-                        ordersList.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>';
-                        return;
-                    }
-                    let orders = [];
-                    snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-                    orders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
-                    ordersList.innerHTML = orders.map(order => `
-                        <div class="bg-white p-4 rounded-lg shadow-md">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-bold">${order.customerName}</p>
-                                    <p class="text-sm text-gray-600">${order.customerAddress}</p>
-                                    <p class="text-sm text-gray-500">${order.createdAt.toDate().toLocaleString('pt-BR')}</p>
-                                </div>
-                                <div class="text-right">
-                                    <p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p>
-                                    <p class="text-sm">Pagamento: ${order.paymentMethod === 'stripe' ? 'Online' : 'Na Entrega'}</p>
-                                </div>
-                            </div>
-                             <div class="mt-2">
-                                <ul class="list-disc list-inside text-sm">
-                                    ${order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}
-                                </ul>
-                            </div>
-                            ${order.instructions ? `<div class="mt-2 p-2 bg-yellow-100 rounded-md text-sm"><strong>Instruções:</strong> ${order.instructions}</div>` : ''}
-                            ${order.coupon ? `<div class="mt-2 text-sm text-green-600"><strong>Cupom Usado:</strong> ${order.coupon.code} (-R$ ${order.coupon.discount.toFixed(2).replace('.',',')})</div>` : ''}
-                            <div class="mt-4 flex items-center justify-between">
-                                <p class="text-sm font-semibold">Status:</p>
-                                <select onchange="updateOrderStatus('${order.id}', this.value)" class="p-2 border rounded">
-                                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendente</option>
-                                    <option value="in_preparation" ${order.status === 'in_preparation' ? 'selected' : ''}>Em Preparo</option>
-                                    <option value="out_for_delivery" ${order.status === 'out_for_delivery' ? 'selected' : ''}>Saiu para Entrega</option>
-                                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Concluído</option>
-                                    <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>Cancelado</option>
-                                </select>
-                            </div>
-                        </div>
-                    `).join('');
-                });
-            }
-
-            window.updateOrderStatus = async (orderId, newStatus) => {
-                const orderRef = doc(db, "orders", orderId);
-                await updateDoc(orderRef, { status: newStatus });
-            };
-
-            const productForm = document.getElementById('product-form');
-            const cancelEditBtn = document.getElementById('cancel-edit-btn');
-            productForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const id = document.getElementById('product-id').value;
-                const productData = {
-                    name: document.getElementById('product-name').value,
-                    price: parseFloat(document.getElementById('product-price').value),
-                    category: document.getElementById('product-category').value,
-                    imageUrl: document.getElementById('product-image-url').value,
-                };
-                if (id) {
-                    await updateDoc(doc(db, "products", id), productData);
-                } else {
-                    await addDoc(productsCollection, productData);
-                }
-                resetForm();
-            });
-            cancelEditBtn.addEventListener('click', resetForm);
-            function resetForm() {
-                productForm.reset();
-                document.getElementById('product-id').value = '';
-                document.getElementById('form-title').textContent = 'Adicionar Novo Produto';
-                cancelEditBtn.classList.add('hidden');
-            }
-            function listenToProductsAdmin() {
-                onSnapshot(productsCollection, (snapshot) => {
-                    const productsList = document.getElementById('products-list');
-                    if (snapshot.empty) {
-                        productsList.innerHTML = '<p class="text-gray-500">Nenhum produto cadastrado.</p>';
-                        return;
-                    }
-                    productsList.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const product = { id: doc.id, ...doc.data() };
-                        const card = document.createElement('div');
-                        card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col';
-                        card.innerHTML = `
-                            <img src="${product.imageUrl || 'https://placehold.co/300x200/CCCCCC/FFFFFF?text=Sem+Imagem'}" alt="${product.name}" class="w-full h-32 object-cover rounded-md mb-4">
-                            <h4 class="font-bold flex-1">${product.name}</h4>
-                            <p class="text-gray-600">${product.category}</p>
-                            <p class="text-green-600 font-semibold text-lg">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
-                            <div class="mt-4 flex space-x-2">
-                                <button class="edit-btn w-full bg-yellow-400 text-sm py-1 rounded hover:bg-yellow-500">Editar</button>
-                                <button class="delete-btn w-full bg-red-500 text-white text-sm py-1 rounded hover:bg-red-600">Excluir</button>
-                            </div>
-                        `;
-                        card.querySelector('.edit-btn').addEventListener('click', () => editProduct(product));
-                        card.querySelector('.delete-btn').addEventListener('click', () => deleteProduct(product.id, product.name));
-                        productsList.appendChild(card);
+            Object.keys(tabs).forEach(tabId => {
+                const tabButton = document.getElementById(`tab-${tabId}`);
+                tabButton.addEventListener('click', () => {
+                    Object.keys(tabs).forEach(t => {
+                        document.getElementById(`tab-${t}`).classList.remove(...activeTabClasses);
+                        document.getElementById(tabs[t]).classList.add('hidden');
                     });
+                    tabButton.classList.add(...activeTabClasses);
+                    document.getElementById(tabs[tabId]).classList.remove('hidden');
                 });
-            }
-            function editProduct(product) {
-                document.getElementById('product-id').value = product.id;
-                document.getElementById('product-name').value = product.name;
-                document.getElementById('product-price').value = product.price;
-                document.getElementById('product-category').value = product.category;
-                document.getElementById('product-image-url').value = product.imageUrl;
-                document.getElementById('form-title').textContent = 'Editando Produto';
-                cancelEditBtn.classList.remove('hidden');
-                window.scrollTo({ top: document.getElementById('products').offsetTop, behavior: 'smooth' });
-            }
-            async function deleteProduct(id, name) {
-                if (confirm(`Tem certeza que deseja excluir o produto "${name}"?`)) {
-                    await deleteDoc(doc(db, "products", id));
-                }
-            }
-            document.getElementById('coupon-form').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
-                const couponData = {
-                    type: document.getElementById('coupon-type-admin').value,
-                    value: parseFloat(document.getElementById('coupon-value-admin').value),
-                    active: true
-                };
-                if (!code || !couponData.value) return;
-                await setDoc(doc(db, "coupons", code), couponData);
-                document.getElementById('coupon-form').reset();
             });
-            function listenToCoupons() {
-                onSnapshot(query(couponsCollection), (snapshot) => {
-                    const listEl = document.getElementById('coupons-list');
-                    if (snapshot.empty) {
-                        listEl.innerHTML = '<p class="text-gray-500">Nenhum cupom criado.</p>';
-                        return;
-                    }
-                    listEl.innerHTML = '';
-                    snapshot.forEach(doc => {
-                        const coupon = { id: doc.id, ...doc.data() };
-                        const couponCard = document.createElement('div');
-                        couponCard.className = 'bg-white p-3 rounded-md shadow-sm flex justify-between items-center';
-                        couponCard.innerHTML = `
-                            <div>
-                                <span class="font-mono bg-gray-200 px-2 py-1 rounded">${coupon.id}</span>
-                                <span class="ml-4">${coupon.type === 'fixed' ? `R$ ${coupon.value.toFixed(2).replace('.',',')}` : `${coupon.value}%`} de desconto</span>
-                            </div>
-                            <button class="delete-coupon-btn text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
-                        `;
-                        couponCard.querySelector('.delete-coupon-btn').addEventListener('click', () => deleteCoupon(coupon.id));
-                        listEl.appendChild(couponCard);
-                    });
-                });
-            }
-            async function deleteCoupon(id) {
-                if (confirm(`Tem certeza que deseja excluir o cupom "${id}"?`)) {
-                    await deleteDoc(doc(db, "coupons", id));
-                }
-            }
         }
-
-        // --- CÓDIGO DA LOJA DO CLIENTE ---
-        function initializeCustomerApp() {
-            const customerAppContainer = document.getElementById('customer-app');
-            customerAppContainer.innerHTML = `
-                <div class="container mx-auto p-4 max-w-7xl">
-                    <header class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-6 flex items-center justify-between">
-                        <div class="flex items-center space-x-4">
-                            <div class="bg-blue-500 text-white p-3 rounded-full">
-                                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="w-8 h-8"><g transform="rotate(-45 50 50) translate(0, 5)"><path d="M 50,10 L 70,40 L 60,45 L 60,70 L 40,70 L 40,45 L 30,40 Z" fill="white"/><path d="M 50,70 L 40,90 L 60,90 Z" fill="#F59E0B"/><circle cx="50" cy="30" r="8" fill="#60A5FA"/></g></svg>
-                            </div>
-                            <div><h1 class="text-2xl font-bold text-gray-900 dark:text-white">SI Delivery</h1><p class="text-gray-500 dark:text-gray-400">Conveniência Santa Isabel</p></div>
-                        </div>
-                        <div class="flex items-center space-x-4"><div id="auth-info" class="text-xs text-gray-400">Carregando...</div><button id="theme-toggle-customer" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-sm p-2.5"><i id="theme-toggle-dark-icon-customer" class="fas fa-moon text-lg hidden"></i><i id="theme-toggle-light-icon-customer" class="fas fa-sun text-lg hidden"></i></button></div>
-                    </header>
-                    <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 space-y-6">
-                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                                <div class="flex justify-between items-center mb-4"><h2 class="text-xl font-bold">Nosso Cardápio</h2><div class="w-1/2"><input type="text" id="search-bar" placeholder="🔎 Procurar produto..." class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 transition bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"></div></div>
-                                <div id="product-list" class="space-y-6 min-h-[200px]"><div class="text-center py-10"><i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i><p class="mt-4 text-gray-500 dark:text-gray-400">Aguardando produtos...</p></div></div>
-                            </div>
-                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
-                                <div class="flex border-b border-gray-200 dark:border-gray-700 mb-4 overflow-x-auto scrollbar-hide">
-                                    <button id="tab-upsell" class="tab-btn py-2 px-4 font-semibold border-b-2 whitespace-nowrap border-blue-500 text-blue-600 bg-blue-50 dark:bg-gray-700 dark:text-white">Que tal adicionar?</button>
-                                    <button id="tab-reorder" class="tab-btn py-2 px-4 font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 whitespace-nowrap">Peça de Novo</button>
-                                    <button id="tab-my-orders" class="tab-btn py-2 px-4 font-semibold border-b-2 border-transparent text-gray-500 dark:text-gray-400 whitespace-nowrap">Meus Pedidos</button>
-                                </div>
-                                <div id="panel-upsell"><div id="upsell-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div></div>
-                                <div id="panel-reorder" class="hidden"><div id="reorder-list" class="space-y-4"></div></div>
-                                <div id="panel-my-orders" class="hidden"><div id="my-orders-list" class="space-y-4"></div></div>
-                            </div>
-                        </div>
-                        <aside class="lg:col-span-1">
-                            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 sticky top-4">
-                                <h2 class="text-xl font-bold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2 flex items-center"><i class="fas fa-shopping-cart mr-2"></i>Seu Pedido</h2>
-                                <div id="cart-items" class="space-y-4 max-h-60 overflow-y-auto scrollbar-hide"><p id="empty-cart-message" class="text-gray-500 dark:text-gray-400 text-center py-4">Seu carrinho está vazio.</p></div>
-                                <div id="cart-summary" class="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4 hidden">
-                                    <div class="flex space-x-2 mb-4"><input type="text" id="coupon-code" placeholder="Cupom de desconto" class="w-full p-2 border rounded-md bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"><button id="apply-coupon-btn" class="bg-gray-700 text-white px-4 rounded-md hover:bg-black dark:bg-gray-600 dark:hover:bg-gray-500">Aplicar</button></div>
-                                    <div id="coupon-feedback" class="text-sm mb-4"></div>
-                                    <div id="total-calculation"><div class="flex justify-between text-gray-600 dark:text-gray-300"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div><div class="flex justify-between text-red-600"><span>Desconto</span><span id="cart-discount">- R$ 0,00</span></div><div class="flex justify-between font-bold text-lg mt-2"><span>Total</span><span id="cart-total">R$ 0,00</span></div></div>
-                                    <div id="customer-info-form"><h3 class="font-bold mt-6 mb-2">Informações para Entrega</h3><input type="text" id="customer-name" placeholder="Seu nome" class="w-full p-2 border rounded-md mb-2 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required><input type="text" id="customer-address" placeholder="Seu endereço completo" class="w-full p-2 border rounded-md mb-2 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required><textarea id="delivery-instructions" placeholder="Instruções para o entregador (opcional)" class="w-full p-2 border rounded-md mb-2 h-16 bg-white border-gray-300 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"></textarea><button id="continue-to-payment-btn" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-colors">Continuar</button></div>
-                                    <div id="payment-options" class="hidden mt-4"><h3 class="font-bold mt-6 mb-2">Forma de Pagamento</h3><div class="space-y-3"><button id="pay-on-delivery-btn" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white font-bold py-3 rounded-lg">Pagar na Entrega</button><button id="pay-with-stripe-btn" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg"><i class="fab fa-stripe-s mr-2"></i>Pagar Online</button></div></div>
-                                </div>
-                            </div>
-                        </aside>
-                    </main>
-                    <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50"><div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-8 text-center max-w-sm mx-4"><div class="text-green-500 mb-4"><i class="fas fa-check-circle fa-4x"></i></div><h3 class="text-2xl font-bold mb-2">Pedido Recebido!</h3><p class="text-gray-600 dark:text-gray-300">Seu pedido foi enviado com sucesso. Acompanhe o status na aba "Meus Pedidos".</p><button onclick="closeModal()" class="mt-6 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">Fechar</button></div></div>
-                </div>
-            `;
-            
-            const themeToggleBtnCustomer = document.getElementById('theme-toggle-customer');
-            const themeToggleDarkIconCustomer = document.getElementById('theme-toggle-dark-icon-customer');
-            const themeToggleLightIconCustomer = document.getElementById('theme-toggle-light-icon-customer');
-
-            function applyThemeCustomer(theme) {
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                    themeToggleLightIconCustomer.classList.remove('hidden');
-                    themeToggleDarkIconCustomer.classList.add('hidden');
-                } else {
-                    document.documentElement.classList.remove('dark');
-                    themeToggleDarkIconCustomer.classList.remove('hidden');
-                    themeToggleLightIconCustomer.classList.add('hidden');
-                }
-            }
-            applyThemeCustomer(localStorage.getItem('color-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-            themeToggleBtnCustomer.addEventListener('click', () => {
-                const newTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-                localStorage.setItem('color-theme', newTheme);
-                applyThemeCustomer(newTheme);
-            });
-
-            let cart = {};
-            let userId = null;
-            let allProducts = [];
-            let appliedCoupon = null;
-            
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    document.getElementById('auth-info').textContent = `ID Cliente: ${userId.substring(0, 8)}...`;
-                    setupAppCustomer();
-                } else {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (error) {
-                        console.error("Authentication error:", error);
-                        document.getElementById('auth-info').textContent = 'Erro de conexão.';
-                    }
-                }
-            });
-
-            async function setupAppCustomer() {
-                listenToProductsCustomer();
-                loadUserOrders();
-                setupUIListenersCustomer();
-            }
-            
-            function setupUIListenersCustomer() {
-                document.getElementById('search-bar').addEventListener('input', (e) => renderProductsCustomer(allProducts, e.target.value));
-                document.getElementById('apply-coupon-btn').addEventListener('click', applyCoupon);
-                document.getElementById('continue-to-payment-btn').addEventListener('click', showPaymentOptions);
-                document.getElementById('pay-on-delivery-btn').addEventListener('click', () => placeOrder('on_delivery'));
-                document.getElementById('pay-with-stripe-btn').addEventListener('click', () => placeOrder('stripe'));
-                const tabs = { upsell: 'panel-upsell', reorder: 'panel-reorder', 'my-orders': 'panel-my-orders' };
-                const activeTabClasses = ['border-blue-500', 'text-blue-600', 'bg-blue-50', 'dark:bg-gray-700', 'dark:text-white'];
-                Object.keys(tabs).forEach(tabId => {
-                    const tabButton = document.getElementById(`tab-${tabId}`);
-                    tabButton.addEventListener('click', () => {
-                        Object.keys(tabs).forEach(t => {
-                            document.getElementById(`tab-${t}`).classList.remove(...activeTabClasses);
-                            document.getElementById(tabs[t]).classList.add('hidden');
-                        });
-                        tabButton.classList.add(...activeTabClasses);
-                        document.getElementById(tabs[tabId]).classList.remove('hidden');
-                    });
-                });
-            }
-            
-            function listenToProductsCustomer() {
-                onSnapshot(productsCollection, (snapshot) => {
-                    allProducts = [];
-                    snapshot.forEach((doc) => allProducts.push({ id: doc.id, ...doc.data() }));
-                    renderProductsCustomer(allProducts);
-                    renderUpsellSuggestions();
-                });
-            }
-
-            function renderProductsCustomer(products, filter = '') {
-                const productList = document.getElementById('product-list');
-                const normalizedFilter = filter.trim().toLowerCase();
-                const filteredProducts = products.filter(p => p.name.toLowerCase().includes(normalizedFilter));
-                if (filteredProducts.length === 0) {
-                    productList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center py-10">Nenhum produto encontrado. Verifique o painel de administração.</p>`;
-                    return;
-                }
-                const productsByCategory = filteredProducts.reduce((acc, p) => ({...acc, [p.category]:[...(acc[p.category]||[]), p]}), {});
-                const categoryOrder = ['Cervejas', 'Destilados', 'Vinhos', 'Não Alcoólicos', 'Complementos'];
-                const sortedCategories = Object.keys(productsByCategory).sort((a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b));
-                productList.innerHTML = sortedCategories.map(category => `
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">${category}</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            ${productsByCategory[category].map(p => `
-                                <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 flex items-center space-x-4 border border-transparent hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all">
-                                    <img src="${p.imageUrl}" alt="${p.name}" class="w-20 h-20 rounded-md object-cover" onerror="this.src='https://placehold.co/100x100/CCCCCC/FFFFFF?text=Sem+Imagem'">
-                                    <div class="flex-1">
-                                        <h4 class="font-semibold">${p.name}</h4>
-                                        <p class="text-green-600 dark:text-green-400 font-bold">R$ ${p.price.toFixed(2).replace('.', ',')}</p>
-                                    </div>
-                                    <button onclick="handleAddToCart('${p.id}', '${p.name}', ${p.price})" class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-600 transition-colors"><i class="fas fa-plus"></i></button>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            }
-            
-            window.handleAddToCart = (id, name, price) => {
-                if (cart[id]) cart[id].quantity++;
-                else cart[id] = { id, name, price, quantity: 1 };
-                renderCart();
-            };
-            window.updateCartQuantity = (id, change) => {
-                if (cart[id]) {
-                    cart[id].quantity += change;
-                    if (cart[id].quantity <= 0) delete cart[id];
-                }
-                renderCart();
-            };
-            function renderCart() {
-                const cartItemsContainer = document.getElementById('cart-items');
-                const emptyMsg = document.getElementById('empty-cart-message');
-                const cartSummary = document.getElementById('cart-summary');
-                const cartIds = Object.keys(cart);
-                if (cartIds.length === 0) {
-                    cartItemsContainer.innerHTML = '';
-                    emptyMsg.style.display = 'block';
-                    cartSummary.style.display = 'none';
-                } else {
-                    emptyMsg.style.display = 'none';
-                    cartSummary.style.display = 'block';
-                    cartItemsContainer.innerHTML = cartIds.map(id => {
-                        const item = cart[id];
-                        return `<div class="flex justify-between items-center"><div><p class="font-semibold">${item.name}</p><p class="text-sm text-gray-500 dark:text-gray-400">R$ ${item.price.toFixed(2).replace('.', ',')}</p></div><div class="flex items-center space-x-2"><button onclick="updateCartQuantity('${id}', -1)" class="quantity-btn bg-gray-200 dark:bg-gray-700 rounded-full w-6 h-6">-</button><span>${item.quantity}</span><button onclick="updateCartQuantity('${id}', 1)" class="quantity-btn bg-gray-200 dark:bg-gray-700 rounded-full w-6 h-6">+</button></div></div>`;
-                    }).join('');
-                }
-                const subtotal = Object.values(cart).reduce((sum, item) => sum + item.price * item.quantity, 0);
-                let discount = 0;
-                if (appliedCoupon) {
-                    if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
-                    else if (appliedCoupon.type === 'percentage') discount = subtotal * (appliedCoupon.value / 100);
-                }
-                const total = Math.max(0, subtotal - discount);
-                document.getElementById('cart-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
-                document.getElementById('cart-discount').textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
-                document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        
+        function listenToProducts() {
+            onSnapshot(productsCollection, (snapshot) => {
+                allProducts = [];
+                snapshot.forEach((doc) => allProducts.push({ id: doc.id, ...doc.data() }));
+                renderProducts(allProducts);
                 renderUpsellSuggestions();
+            });
+        }
+
+        function renderProducts(products, filter = '') {
+            const productList = document.getElementById('product-list');
+            const normalizedFilter = filter.trim().toLowerCase();
+            const filteredProducts = products.filter(p => p.name.toLowerCase().includes(normalizedFilter));
+
+            if (filteredProducts.length === 0) {
+                productList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center py-10">Nenhum produto encontrado. Verifique o painel de administração.</p>`;
+                return;
             }
-            async function applyCoupon() {
-                const code = document.getElementById('coupon-code').value.trim().toUpperCase();
-                const feedbackEl = document.getElementById('coupon-feedback');
-                if (!code) return;
-                const couponRef = doc(db, "coupons", code);
-                const couponSnap = await getDoc(couponRef);
-                if (couponSnap.exists() && couponSnap.data().active) {
-                    appliedCoupon = { id: couponSnap.id, ...couponSnap.data() };
-                    feedbackEl.textContent = `Cupom "${code}" aplicado com sucesso!`;
-                    feedbackEl.className = 'text-sm mb-4 text-green-600 dark:text-green-400';
-                } else {
-                    appliedCoupon = null;
-                    feedbackEl.textContent = 'Cupom inválido ou expirado.';
-                    feedbackEl.className = 'text-sm mb-4 text-red-600';
-                }
-                renderCart();
+            
+            const productsByCategory = filteredProducts.reduce((acc, p) => ({...acc, [p.category]:[...(acc[p.category]||[]), p]}), {});
+            const categoryOrder = ['Cervejas', 'Destilados', 'Vinhos', 'Não Alcoólicos', 'Complementos'];
+            const sortedCategories = Object.keys(productsByCategory).sort((a, b) => categoryOrder.indexOf(a) - categoryOrder.indexOf(b));
+
+            productList.innerHTML = sortedCategories.map(category => `
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">${category}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${productsByCategory[category].map(p => `
+                            <div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 flex items-center space-x-4 border border-transparent hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-lg transition-all">
+                                <img src="${p.imageUrl}" alt="${p.name}" class="w-20 h-20 rounded-md object-cover" onerror="this.src='https://placehold.co/100x100/CCCCCC/FFFFFF?text=Sem+Imagem'">
+                                <div class="flex-1">
+                                    <h4 class="font-semibold">${p.name}</h4>
+                                    <p class="text-green-600 dark:text-green-400 font-bold">R$ ${p.price.toFixed(2).replace('.', ',')}</p>
+                                </div>
+                                <button onclick="handleAddToCart('${p.id}', '${p.name}', ${p.price})" class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center hover:bg-blue-600 transition-colors">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        window.handleAddToCart = (id, name, price) => {
+            if (cart[id]) {
+                cart[id].quantity++;
+            } else {
+                cart[id] = { id, name, price, quantity: 1 };
             }
-            function showPaymentOptions() {
-                if (!document.getElementById('customer-name').value.trim() || !document.getElementById('customer-address').value.trim()) {
-                    alert("Por favor, preencha seu nome e endereço.");
-                    return;
-                }
-                document.getElementById('customer-info-form').classList.add('hidden');
-                document.getElementById('payment-options').classList.remove('hidden');
+            renderCart();
+        };
+
+        window.updateCartQuantity = (id, change) => {
+            if (cart[id]) {
+                cart[id].quantity += change;
+                if (cart[id].quantity <= 0) delete cart[id];
             }
-            async function placeOrder(paymentMethod) {
-                const customerName = document.getElementById('customer-name').value.trim();
-                const customerAddress = document.getElementById('customer-address').value.trim();
-                const instructions = document.getElementById('delivery-instructions').value.trim();
-                if (!customerName || !customerAddress || Object.keys(cart).length === 0) return;
-                const subtotal = Object.values(cart).reduce((sum, item) => sum + item.price * item.quantity, 0);
-                let discountValue = 0;
-                if (appliedCoupon) {
-                    if (appliedCoupon.type === 'fixed') discountValue = appliedCoupon.value;
-                    else if (appliedCoupon.type === 'percentage') discountValue = subtotal * (appliedCoupon.value / 100);
+            renderCart();
+        };
+
+        function renderCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const emptyMsg = document.getElementById('empty-cart-message');
+            const cartSummary = document.getElementById('cart-summary');
+            const cartIds = Object.keys(cart);
+
+            if (cartIds.length === 0) {
+                cartItemsContainer.innerHTML = '';
+                emptyMsg.style.display = 'block';
+                cartSummary.style.display = 'none';
+            } else {
+                emptyMsg.style.display = 'none';
+                cartSummary.style.display = 'block';
+                cartItemsContainer.innerHTML = cartIds.map(id => {
+                    const item = cart[id];
+                    return `<div class="flex justify-between items-center"><div><p class="font-semibold">${item.name}</p><p class="text-sm text-gray-500 dark:text-gray-400">R$ ${item.price.toFixed(2).replace('.', ',')}</p></div><div class="flex items-center space-x-2"><button onclick="updateCartQuantity('${id}', -1)" class="quantity-btn bg-gray-200 dark:bg-gray-700 rounded-full w-6 h-6">-</button><span>${item.quantity}</span><button onclick="updateCartQuantity('${id}', 1)" class="quantity-btn bg-gray-200 dark:bg-gray-700 rounded-full w-6 h-6">+</button></div></div>`;
+                }).join('');
+            }
+            
+            const subtotal = Object.values(cart).reduce((sum, item) => sum + item.price * item.quantity, 0);
+            let discount = 0;
+
+            if (appliedCoupon) {
+                if (appliedCoupon.type === 'fixed') {
+                    discount = appliedCoupon.value;
+                } else if (appliedCoupon.type === 'percentage') {
+                    discount = subtotal * (appliedCoupon.value / 100);
                 }
-                const total = Math.max(0, subtotal - discountValue);
-                const orderData = {
-                    customerName, customerAddress, instructions,
-                    items: Object.values(cart),
-                    subtotal, total, 
-                    coupon: appliedCoupon ? { code: appliedCoupon.id, discount: discountValue } : null,
-                    status: 'pending', paymentMethod,
-                    createdAt: new Date(), userId
-                };
+            }
+            
+            const total = Math.max(0, subtotal - discount);
+
+            document.getElementById('cart-subtotal').textContent = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+            document.getElementById('cart-discount').textContent = `- R$ ${discount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('cart-total').textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            renderUpsellSuggestions();
+        }
+
+        async function applyCoupon() {
+            const code = document.getElementById('coupon-code').value.trim().toUpperCase();
+            const feedbackEl = document.getElementById('coupon-feedback');
+            if (!code) return;
+
+            const couponRef = doc(db, "coupons", code);
+            const couponSnap = await getDoc(couponRef);
+
+            if (couponSnap.exists() && couponSnap.data().active) {
+                appliedCoupon = { id: couponSnap.id, ...couponSnap.data() };
+                feedbackEl.textContent = `Cupom "${code}" aplicado com sucesso!`;
+                feedbackEl.className = 'text-sm mb-4 text-green-600 dark:text-green-400';
+            } else {
+                appliedCoupon = null;
+                feedbackEl.textContent = 'Cupom inválido ou expirado.';
+                feedbackEl.className = 'text-sm mb-4 text-red-600';
+            }
+            renderCart();
+        }
+
+        function showPaymentOptions() {
+            if (!document.getElementById('customer-name').value.trim() || !document.getElementById('customer-address').value.trim()) {
+                alert("Por favor, preencha seu nome e endereço.");
+                return;
+            }
+            document.getElementById('customer-info-form').classList.add('hidden');
+            document.getElementById('payment-options').classList.remove('hidden');
+        }
+
+        async function placeOrder(paymentMethod) {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const customerAddress = document.getElementById('customer-address').value.trim();
+            const instructions = document.getElementById('delivery-instructions').value.trim();
+            if (!customerName || !customerAddress || Object.keys(cart).length === 0) return;
+
+            const subtotal = Object.values(cart).reduce((sum, item) => sum + item.price * item.quantity, 0);
+            let discountValue = 0;
+            if (appliedCoupon) {
+                if (appliedCoupon.type === 'fixed') discountValue = appliedCoupon.value;
+                else if (appliedCoupon.type === 'percentage') discountValue = subtotal * (appliedCoupon.value / 100);
+            }
+            const total = Math.max(0, subtotal - discountValue);
+
+            const orderData = {
+                customerName, customerAddress, instructions,
+                items: Object.values(cart),
+                subtotal, total, 
+                coupon: appliedCoupon ? { code: appliedCoupon.id, discount: discountValue } : null,
+                status: 'pending', paymentMethod,
+                createdAt: new Date(), userId
+            };
+
+            try {
                 await addDoc(ordersCollection, orderData);
                 cart = {};
                 appliedCoupon = null;
@@ -548,71 +398,78 @@
                 document.getElementById('payment-options').classList.add('hidden');
                 renderCart();
                 document.getElementById('success-modal').classList.remove('hidden');
+            } catch (error) {
+                console.error("Erro ao finalizar o pedido: ", error);
             }
-            function renderUpsellSuggestions() {
-                const upsellList = document.getElementById('upsell-list');
-                const cartIds = Object.keys(cart);
-                const suggestions = allProducts.filter(p => !cartIds.includes(p.id)).sort(() => 0.5 - Math.random()).slice(0, 4);
-                if(suggestions.length === 0) {
-                    upsellList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-2 text-center">Boas escolhas!</p>`;
-                    return;
-                }
-                upsellList.innerHTML = suggestions.map(p => `<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 flex items-center space-x-3 border border-transparent hover:border-blue-400"><img src="${p.imageUrl}" alt="${p.name}" class="w-12 h-12 rounded-md object-cover"><div class="flex-1"><h5 class="font-semibold text-sm">${p.name}</h5><p class="text-green-600 dark:text-green-400 font-bold text-sm">R$ ${p.price.toFixed(2).replace('.', ',')}</p></div><button onclick="handleAddToCart('${p.id}', '${p.name}', ${p.price})" class="bg-blue-100 text-blue-600 dark:bg-gray-600 dark:text-blue-300 rounded-full w-8 h-8 flex items-center justify-center hover:bg-blue-200 dark:hover:bg-gray-500"><i class="fas fa-plus text-xs"></i></button></div>`).join('');
+        }
+        
+        function renderUpsellSuggestions() {
+            const upsellList = document.getElementById('upsell-list');
+            const cartIds = Object.keys(cart);
+            const suggestions = allProducts.filter(p => !cartIds.includes(p.id)).sort(() => 0.5 - Math.random()).slice(0, 4);
+            if(suggestions.length === 0) {
+                upsellList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 col-span-2 text-center">Boas escolhas!</p>`;
+                return;
             }
-            function loadUserOrders() {
-                if (!userId) return;
-                const q = query(ordersCollection, where("userId", "==", userId));
-                onSnapshot(q, (snapshot) => {
-                    let orders = [];
-                    snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-                    orders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
-                    renderOrderHistory(orders.slice(0, 5));
-                    renderMyOrders(orders);
-                });
+            upsellList.innerHTML = suggestions.map(p => `<div class="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 flex items-center space-x-3 border border-transparent hover:border-blue-400"><img src="${p.imageUrl}" alt="${p.name}" class="w-12 h-12 rounded-md object-cover"><div class="flex-1"><h5 class="font-semibold text-sm">${p.name}</h5><p class="text-green-600 dark:text-green-400 font-bold text-sm">R$ ${p.price.toFixed(2).replace('.', ',')}</p></div><button onclick="handleAddToCart('${p.id}', '${p.name}', ${p.price})" class="bg-blue-100 text-blue-600 dark:bg-gray-600 dark:text-blue-300 rounded-full w-8 h-8 flex items-center justify-center hover:bg-blue-200 dark:hover:bg-gray-500"><i class="fas fa-plus text-xs"></i></button></div>`).join('');
+        }
+        
+        function loadUserOrders() {
+            if (!userId) return;
+            const q = query(ordersCollection, where("userId", "==", userId));
+            onSnapshot(q, (snapshot) => {
+                let orders = [];
+                snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+                orders.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+                renderOrderHistory(orders.slice(0, 5));
+                renderMyOrders(orders);
+            });
+        }
+
+        function renderOrderHistory(orders) {
+            const reorderList = document.getElementById('reorder-list');
+            if (orders.length === 0) {
+                reorderList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">Você ainda não fez pedidos.</p>`;
+                return;
             }
-            function renderOrderHistory(orders) {
-                const reorderList = document.getElementById('reorder-list');
-                if (orders.length === 0) {
-                    reorderList.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">Você ainda não fez pedidos.</p>`;
-                    return;
-                }
-                reorderList.innerHTML = orders.map(order => {
-                    const itemsJson = JSON.stringify(order.items);
-                    return `<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"><div class="flex justify-between items-center"><div><p class="font-semibold">Pedido de ${order.createdAt.toDate().toLocaleDateString('pt-BR')}</p><p class="text-sm text-gray-500 dark:text-gray-400">${order.items.length} item(ns) - Total: R$ ${order.total.toFixed(2).replace('.', ',')}</p></div><button data-items='${itemsJson}' class="reorder-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"><i class="fas fa-redo mr-2"></i>Pedir de Novo</button></div></div>`;
-                }).join('');
-                document.querySelectorAll('.reorder-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const items = JSON.parse(btn.dataset.items);
-                        items.forEach(item => {
-                            for(let i = 0; i < item.quantity; i++) {
-                                handleAddToCart(item.id, item.name, item.price);
-                            }
-                        });
+            reorderList.innerHTML = orders.map(order => {
+                const itemsJson = JSON.stringify(order.items);
+                return `<div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"><div class="flex justify-between items-center"><div><p class="font-semibold">Pedido de ${order.createdAt.toDate().toLocaleDateString('pt-BR')}</p><p class="text-sm text-gray-500 dark:text-gray-400">${order.items.length} item(ns) - Total: R$ ${order.total.toFixed(2).replace('.', ',')}</p></div><button data-items='${itemsJson}' class="reorder-btn bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"><i class="fas fa-redo mr-2"></i>Pedir de Novo</button></div></div>`;
+            }).join('');
+            document.querySelectorAll('.reorder-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const items = JSON.parse(btn.dataset.items);
+                    items.forEach(item => {
+                        for(let i = 0; i < item.quantity; i++) {
+                            handleAddToCart(item.id, item.name, item.price);
+                        }
                     });
                 });
-            }
-            function renderMyOrders(orders) {
-                const listEl = document.getElementById('my-orders-list');
-                if (orders.length === 0) {
-                    listEl.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">Você ainda não fez pedidos.</p>`;
-                    return;
-                }
-                const statusMap = { pending: 'Pendente', in_preparation: 'Em Preparo', out_for_delivery: 'Saiu para Entrega', completed: 'Concluído', canceled: 'Cancelado' };
-                const statusColor = { pending: 'bg-yellow-400 text-yellow-800', in_preparation: 'bg-blue-400 text-blue-800', out_for_delivery: 'bg-purple-400 text-purple-800', completed: 'bg-green-400 text-green-800', canceled: 'bg-red-400 text-red-800' };
-                listEl.innerHTML = orders.map(order => `
-                    <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <p class="font-semibold">Pedido de ${order.createdAt.toDate().toLocaleDateString('pt-BR')}</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">${order.items.length} item(ns) - Total: R$ ${order.total.toFixed(2).replace('.', ',')}</p>
-                            </div>
-                            <span class="text-xs font-bold px-2 py-1 rounded-full ${statusColor[order.status] || 'bg-gray-400'}">${statusMap[order.status] || 'Desconhecido'}</span>
-                        </div>
-                    </div>
-                `).join('');
-            }
-            window.closeModal = () => document.getElementById('success-modal').classList.add('hidden');
+            });
         }
+
+        function renderMyOrders(orders) {
+            const listEl = document.getElementById('my-orders-list');
+            if (orders.length === 0) {
+                listEl.innerHTML = `<p class="text-gray-500 dark:text-gray-400 text-center">Você ainda não fez pedidos.</p>`;
+                return;
+            }
+            const statusMap = { pending: 'Pendente', in_preparation: 'Em Preparo', out_for_delivery: 'Saiu para Entrega', completed: 'Concluído', canceled: 'Cancelado' };
+            const statusColor = { pending: 'bg-yellow-400 text-yellow-800', in_preparation: 'bg-blue-400 text-blue-800', out_for_delivery: 'bg-purple-400 text-purple-800', completed: 'bg-green-400 text-green-800', canceled: 'bg-red-400 text-red-800' };
+            listEl.innerHTML = orders.map(order => `
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="font-semibold">Pedido de ${order.createdAt.toDate().toLocaleDateString('pt-BR')}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${order.items.length} item(ns) - Total: R$ ${order.total.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <span class="text-xs font-bold px-2 py-1 rounded-full ${statusColor[order.status] || 'bg-gray-400'}">${statusMap[order.status] || 'Desconhecido'}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.closeModal = () => document.getElementById('success-modal').classList.add('hidden');
     </script>
 </body>
 </html>
