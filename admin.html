@@ -216,18 +216,17 @@
                 if (snapshot.empty) {
                     console.log("Base de dados de produtos vazia. A adicionar produtos de exemplo...");
                     const sampleProducts = [
-                        { name: 'Cerveja Brahma 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/E53935/FFFFFF?text=Brahma' },
-                        { name: 'Cerveja Skol 350ml', price: 3.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/FFC107/000000?text=Skol' },
-                        { name: 'Cerveja Heineken 330ml', price: 5.50, category: 'Cervejas', imageUrl: 'https://placehold.co/300x200/4CAF50/FFFFFF?text=Heineken' },
-                        { name: 'Gin Tanqueray 750ml', price: 99.90, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/009688/FFFFFF?text=Gin' },
-                        { name: 'Vodka Absolut 750ml', price: 89.90, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/03A9F4/FFFFFF?text=Vodka' },
-                        { name: 'Whisky Red Label 750ml', price: 85.00, category: 'Destilados', imageUrl: 'https://placehold.co/300x200/f44336/FFFFFF?text=Whisky' },
-                        { name: 'Vinho Casillero del Diablo 750ml', price: 55.00, category: 'Vinhos', imageUrl: 'https://placehold.co/300x200/880E4F/FFFFFF?text=Vinho' },
-                        { name: 'Coca-Cola 2L', price: 9.00, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/c62828/FFFFFF?text=Coca-Cola' },
-                        { name: 'Guaraná Antarctica 2L', price: 8.50, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/558b2f/FFFFFF?text=Guaraná' },
-                        { name: 'Água Mineral 500ml', price: 2.50, category: 'Sem Álcool', imageUrl: 'https://placehold.co/300x200/2196F3/FFFFFF?text=Água' },
-                        { name: 'Gelo em Cubo 5kg', price: 10.00, category: 'Para Acompanhar', imageUrl: 'https://placehold.co/300x200/E0F7FA/000000?text=Gelo' },
-                        { name: 'Carvão 3kg', price: 15.00, category: 'Para Acompanhar', imageUrl: 'https://placehold.co/300x200/616161/FFFFFF?text=Carvão' },
+                        { name: 'Cerveja Brahma Duplo Malte 350ml', price: 3.79, category: 'Cervejas', imageUrl: 'https://acdn.mitiendanube.com/stores/001/335/204/products/brahma-duplo-malte-lata-350ml1-c30f8c83d63006093416239565725803-1024-1024.png' },
+                        { name: 'Cerveja Skol Pilsen 350ml', price: 3.29, category: 'Cervejas', imageUrl: 'https://cdn.dooca.store/145/products/cerveja-skol-pilsen-lata-350ml_640x640+fill_ffffff.png?v=1608313937&webp=0' },
+                        { name: 'Cerveja Heineken Lager 330ml', price: 5.49, category: 'Cervejas', imageUrl: 'https://www.imigrantesbebidas.com.br/bebida/images/products/full/1922-cerveja-heineken-long-neck-330ml.png' },
+                        { name: 'Gin Tanqueray London Dry 750ml', price: 109.90, category: 'Destilados', imageUrl: 'https://www.paodeacucar.com/img/uploads/1/914/20237914.png' },
+                        { name: 'Vodka Absolut Original 750ml', price: 89.90, category: 'Destilados', imageUrl: 'https://www.bancadoramon.com.br/media/catalog/product/cache/1/image/1000x/9df78eab33525d08d6e5fb8d27136e95/v/o/vodka_absolut.png' },
+                        { name: 'Whisky Johnnie Walker Red Label 750ml', price: 85.00, category: 'Destilados', imageUrl: 'https://www.casadabebida.com.br/media/catalog/product/cache/1/image/900x900/9df78eab33525d08d6e5fb8d27136e95/w/h/whisky-johnnie-walker-red-label-750-ml.png' },
+                        { name: 'Vinho Chileno Casillero del Diablo 750ml', price: 55.00, category: 'Vinhos', imageUrl: 'https://http2.mlstatic.com/D_NQ_NP_912201-MLB20299902841_052015-O.png' },
+                        { name: 'Coca-Cola Sem Açúcar 2L', price: 9.50, category: 'Sem Álcool', imageUrl: 'https://images.tcdn.com.br/img/img_prod/839446/refrigerante_coca_cola_sem_acucar_2l_533_1_20201021134707.png' },
+                        { name: 'Guaraná Antarctica 2L', price: 8.50, category: 'Sem Álcool', imageUrl: 'https://www.paodeacucar.com/img/uploads/1/432/521432.png' },
+                        { name: 'Gelo em Cubo 5kg', price: 10.00, category: 'Para Acompanhar', imageUrl: 'https://static.distribuidoracaue.com.br/media/catalog/product/cache/1/image/900x900/9df78eab33525d08d6e5fb8d27136e95/g/e/gelo-em-cubo-filtrado-pacote-5-kg-gelo-sete.png' },
+                        { name: 'Carvão Vegetal 3kg', price: 15.00, category: 'Para Acompanhar', imageUrl: 'https://http2.mlstatic.com/D_NQ_NP_983193-MLB45738411209_042021-O.png' },
                     ];
                     for (const product of sampleProducts) {
                         await addDoc(productsCollection, product);
@@ -331,7 +330,7 @@
                         const card = document.createElement('div');
                         card.className = 'bg-white p-4 rounded-lg shadow-md flex flex-col';
                         card.innerHTML = `
-                            <img src="${product.imageUrl || 'https://placehold.co/300x200/CCCCCC/FFFFFF?text=Sem+Imagem'}" alt="${product.name}" class="w-full h-32 object-cover rounded-md mb-4">
+                            <img src="${product.imageUrl || 'https://placehold.co/300x200/CCCCCC/FFFFFF?text=Sem+Imagem'}" alt="${product.name}" class="w-full h-32 object-contain rounded-md mb-4">
                             <h4 class="font-bold flex-1">${product.name}</h4>
                             <p class="text-gray-600">${product.category}</p>
                             <p class="text-green-600 font-semibold text-lg">R$ ${product.price.toFixed(2).replace('.', ',')}</p>
