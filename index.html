@@ -193,12 +193,13 @@
 
             // --- CONFIGURAÇÃO DO FIREBASE ---
             const firebaseConfig = {
-                apiKey: "AIzaSyD_LdDobMQqltW6ejDwibcyoeUoX_BoHEs",
-                authDomain: "zetesteapp.firebaseapp.com",
-                projectId: "zetesteapp",
-                storageBucket: "zetesteapp.firebasestorage.app",
-                messagingSenderId: "344839359009",
-                appId: "1:344839359009:web:c5e4af43649c5a39d8f160"
+                apiKey: "AIzaSyAk3MgbFZJjoK3JPU6t0yWILa0DzynaKzY",
+                authDomain: "sidelivery-19c9f.firebaseapp.com",
+                projectId: "sidelivery-19c9f",
+                storageBucket: "sidelivery-19c9f.appspot.com",
+                messagingSenderId: "824305265358",
+                appId: "1:824305265358:web:912c24aae00034fd003e9f",
+                measurementId: "G-GF93Z3H2CT"
             };
 
             // --- ESTADO DA APLICAÇÃO ---
@@ -210,6 +211,7 @@
             let currentCategory = 'Todos';
             
             // --- CHAVE DE TESTE PUBLICÁVEL DO STRIPE ---
+            // Substitua por sua chave real em produção
             const stripe = Stripe('pk_test_51PbiUjRsyVfMFqsx1B3j3iU5BqBqWwJv8t2a6Oa3eY7g5eX6d7c8f9g0h1i2j3k4l5m6n7o8p9q0r');
 
 
@@ -230,29 +232,13 @@
                     }
                 };
                 themeToggle.addEventListener('click', () => {
-                    console.log('Trocando tema...');
                     document.documentElement.classList.toggle('dark');
                     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
                     updateThemeIcon();
-                    console.log('Tema atual:', localStorage.getItem('theme'));
                 });
                 updateThemeIcon();
 
                 // --- FUNÇÕES DE RENDERIZAÇÃO ---
-                const imageOverrides = {
-                    'Cerveja Brahma Duplo Malte 350ml': 'https://placehold.co/400x400/e0e0e0/000?text=Brahma',
-                    'Cerveja Skol Pilsen 350ml': 'https://placehold.co/400x400/e0e0e0/000?text=Skol',
-                    'Cerveja Heineken Lager 330ml': 'https://placehold.co/400x400/e0e0e0/000?text=Heineken',
-                    'Gin Tanqueray London Dry 750ml': 'https://placehold.co/400x400/e0e0e0/000?text=Tanqueray',
-                    'Vodka Absolut Original 750ml': 'https://placehold.co/400x400/e0e0e0/000?text=Absolut',
-                    'Whisky Johnnie Walker Red Label 750ml': 'https://placehold.co/400x400/e0e0e0/000?text=Red+Label',
-                    'Vinho Chileno Casillero del Diablo 750ml': 'https://placehold.co/400x400/e0e0e0/000?text=Casillero',
-                    'Coca-Cola Sem Açúcar 2L': 'https://placehold.co/400x400/e0e0e0/000?text=Coca-Cola',
-                    'Guaraná Antarctica 2L': 'https://placehold.co/400x400/e0e0e0/000?text=Guaraná',
-                    'Gelo em Cubo 5kg': 'https://placehold.co/400x400/e0e0e0/000?text=Gelo',
-                    'Carvão Vegetal 3kg': 'https://placehold.co/400x400/e0e0e0/000?text=Carvão'
-                };
-
                 const createProductCard = (product) => `
                     <div class="product-card bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden flex flex-col" data-id="${product.id}">
                         <div class="flex-grow p-4">
@@ -269,16 +255,20 @@
                 `;
 
                 const renderProducts = () => {
-                    const categoryProducts = currentCategory === 'Todos' 
-                        ? allProducts 
-                        : allProducts.filter(p => p.category === currentCategory);
+                    let productsToDisplay = allProducts;
 
-                    const searchProducts = categoryProducts.filter(p => 
-                        p.name.toLowerCase().includes(currentSearchTerm.toLowerCase())
-                    );
+                    if (currentCategory !== 'Todos') {
+                        productsToDisplay = productsToDisplay.filter(p => p.category === currentCategory);
+                    }
+
+                    if (currentSearchTerm) {
+                        productsToDisplay = productsToDisplay.filter(p => 
+                            p.name.toLowerCase().includes(currentSearchTerm.toLowerCase())
+                        );
+                    }
                     
-                    const mainProducts = searchProducts.filter(p => p.category !== 'Para Acompanhar');
-                    const upsellProducts = searchProducts.filter(p => p.category === 'Para Acompanhar');
+                    const mainProducts = productsToDisplay.filter(p => p.category !== 'Para Acompanhar');
+                    const upsellProducts = allProducts.filter(p => p.category === 'Para Acompanhar'); // Upsell não é filtrado
 
                     productsGrid.innerHTML = mainProducts.length > 0 ? mainProducts.map(createProductCard).join('') : `<p class="col-span-full text-center text-gray-500 dark:text-gray-400">Nenhum produto encontrado.</p>`;
                     upsellGrid.innerHTML = upsellProducts.length > 0 ? upsellProducts.map(createProductCard).join('') : '';
@@ -346,8 +336,8 @@
                     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
                     let discount = 0;
                     if (appliedCoupon) {
-                        if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
-                        else if (appliedCoupon.type === 'percentage') discount = (subtotal * appliedCoupon.value) / 100;
+                       if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
+                       else if (appliedCoupon.type === 'percentage') discount = (subtotal * appliedCoupon.value) / 100;
                     }
                     const total = Math.max(0, subtotal - discount);
 
@@ -503,19 +493,6 @@
                         <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-64 object-contain p-4 bg-gray-100 dark:bg-gray-700 rounded-t-lg">
                         <div class="p-6">
                             <h3 class="text-2xl font-bold">${product.name}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">${product.brand || 'Marca não informada'}</p>
-                            
-                            <div class="flex items-center mb-4">
-                                <div class="text-yellow-400">
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star"></i>
-                                    <i class="fa-solid fa-star-half-alt"></i>
-                                </div>
-                                <span class="ml-2 text-sm text-gray-600 dark:text-gray-300">${product.rating || '4.5 (120 avaliações)'}</span>
-                            </div>
-
                             <p class="text-gray-700 dark:text-gray-300 mb-6">${product.description || 'Descrição do produto não disponível.'}</p>
 
                             <div class="flex justify-between items-center">
@@ -691,19 +668,7 @@
                     if (user) {
                         checkForStripeSuccess();
                         onSnapshot(collection(db, "products"), (snapshot) => {
-                            allProducts = snapshot.docs.map(doc => {
-                                const productData = doc.data();
-                                const newImage = imageOverrides[productData.name];
-                                return { 
-                                    id: doc.id, 
-                                    ...productData,
-                                    imageUrl: newImage || productData.imageUrl,
-                                    description: productData.description || `Esta é uma descrição de exemplo para ${productData.name}. Beba com moderação.`,
-                                    brand: productData.brand || 'Marca Exemplo',
-                                    rating: productData.rating || (Math.random() * (5 - 4) + 4).toFixed(1)
-                                };
-                            });
-
+                            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                             renderCategories();
                             renderProducts();
                             appLoader.classList.add('hidden');
@@ -795,4 +760,4 @@
     </script>
 
 </body>
-</html>
+</ht
