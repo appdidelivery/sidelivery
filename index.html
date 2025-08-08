@@ -75,17 +75,17 @@
             </div>
             <div id="reorder-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Peça de Novo</h2><p class="text-gray-600 dark:text-gray-400 mb-6">Clique nos itens dos seus pedidos antigos para adicionar ao carrinho atual.</p><div id="reorder-items-list" class="space-y-4"></div></div>
             <div id="my-orders-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Meus Pedidos</h2><div id="my-orders-list" class="space-y-4"></div></div>
-            <div id="support-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Central de Ajuda</h2><div class="space-y-6"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h3 class="font-bold text-lg mb-2">Perguntas Frequentes</h3><div class="space-y-2 text-sm"><p><strong>P: Qual o tempo de entrega?</strong><br>R: O nosso tempo médio de entrega é de 30-45 minutos.</p><p><strong>P: Quais as formas de pagamento?</strong><br>R: Aceitamos pagamento na entrega (dinheiro, cartão) e pagamento online (cartão de crédito).</p></div></div><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h3 class="font-bold text-lg mb-2">Fale Conosco</h3><p class="text-sm">Se precisar de ajuda com um pedido, entre em contato:</p><p class="text-sm mt-2"><i class="fa-solid fa-phone mr-2"></i> (XX) XXXX-XXXX</p><p class="text-sm"><i class="fa-solid fa-envelope mr-2"></i> suporte@sidelivery.com</p></div></div></div>
+            <div id="account-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Minha Conta</h2><div id="account-content" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"></div></div>
         </main>
-        <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg border-t dark:border-gray-700 flex justify-around"><button class="nav-btn nav-btn-active flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="home-view"><i class="fa-solid fa-house text-xl"></i><span class="text-xs font-medium">Início</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="reorder-view"><i class="fa-solid fa-repeat text-xl"></i><span class="text-xs font-medium">Peça de Novo</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="my-orders-view"><i class="fa-solid fa-receipt text-xl"></i><span class="text-xs font-medium">Meus Pedidos</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="support-view"><i class="fa-solid fa-life-ring text-xl"></i><span class="text-xs font-medium">Ajuda</span></button></nav>
+        <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg border-t dark:border-gray-700 flex justify-around"><button class="nav-btn nav-btn-active flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="home-view"><i class="fa-solid fa-house text-xl"></i><span class="text-xs font-medium">Início</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="reorder-view"><i class="fa-solid fa-repeat text-xl"></i><span class="text-xs font-medium">Peça de Novo</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="my-orders-view"><i class="fa-solid fa-receipt text-xl"></i><span class="text-xs font-medium">Meus Pedidos</span></button><button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="account-view"><i class="fa-solid fa-user text-xl"></i><span class="text-xs font-medium">Conta</span></button></nav>
     </div>
     <div id="success-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50"><div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm m-4 text-center p-8"><div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4"><i class="fa-solid fa-check fa-2x text-green-600"></i></div><h3 class="text-xl font-bold mb-2">Pedido Recebido!</h3><p class="text-gray-600 dark:text-gray-300 mb-6">O seu pedido foi enviado com sucesso.</p><button id="close-success-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Fechar</button></div></div>
     <div id="product-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-60"><div id="product-modal-content" class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md m-4 relative max-h-[90vh] overflow-y-auto"></div></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, setDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             const appLoader = document.getElementById('app-loader');
@@ -111,12 +111,13 @@
             const searchBar = document.getElementById('search-bar');
             const productModal = document.getElementById('product-modal');
             const productModalContent = document.getElementById('product-modal-content');
+            const accountContent = document.getElementById('account-content');
 
             const firebaseConfig = {
                 apiKey: "AIzaSyD_LdDobMQqltW6ejDwibcyoeUoX_BoHEs",
                 authDomain: "zetesteapp.firebaseapp.com",
                 projectId: "zetesteapp",
-                storageBucket: "zetesteapp.firebasestorage.app",
+                storageBucket: "zetesteapp.appspot.com",
                 messagingSenderId: "344839359009",
                 appId: "1:344839359009:web:c5e4af43649c5a39d8f160"
             };
@@ -127,6 +128,7 @@
             let orderListeners = []; 
             let currentSearchTerm = '';
             let currentCategory = 'Todos';
+            let currentUser = null;
             
             const stripe = Stripe('pk_test_51PbiUjRsyVfMFqsx1B3j3iU5BqBqWwJv8t2a6Oa3eY7g5eX6d7c8f9g0h1i2j3k4l5m6n7o8p9q0r');
 
@@ -236,11 +238,14 @@
                         paymentMethod: paymentInfo.method || 'delivery',
                         stripePaymentId: paymentInfo.id || null,
                         status: 'pending',
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp(),
+                        userId: currentUser ? currentUser.uid : null
                     };
                     try {
                         const docRef = await addDoc(collection(db, "orders"), orderData);
-                        saveOrderToHistory(docRef.id);
+                        if (currentUser && !currentUser.isAnonymous) {
+                            saveOrderToHistory(docRef.id);
+                        }
                         checkoutForm.reset();
                         couponForm.reset();
                         cart = [];
@@ -390,32 +395,50 @@
                     if (e.target === productModal) closeProductModal();
                 });
 
-                const getOrderHistory = () => JSON.parse(localStorage.getItem('si_delivery_orders')) || [];
+                const getOrderHistory = () => {
+                    if (currentUser && !currentUser.isAnonymous) {
+                        return JSON.parse(localStorage.getItem(`si_delivery_orders_${currentUser.uid}`)) || [];
+                    }
+                    return JSON.parse(localStorage.getItem('si_delivery_orders_guest')) || [];
+                }
+
                 const saveOrderToHistory = (orderId) => {
-                    const history = getOrderHistory();
+                    const key = (currentUser && !currentUser.isAnonymous) ? `si_delivery_orders_${currentUser.uid}` : 'si_delivery_orders_guest';
+                    const history = JSON.parse(localStorage.getItem(key)) || [];
                     if (!history.includes(orderId)) {
                         history.push(orderId);
-                        localStorage.setItem('si_delivery_orders', JSON.stringify(history));
+                        localStorage.setItem(key, JSON.stringify(history));
                     }
                 };
 
                 const renderReorderItems = async () => {
-                    const orderIds = getOrderHistory();
-                    if (orderIds.length === 0) {
-                        reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
-                        return;
-                    }
                     reorderItemsList.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>';
                     const uniqueItems = {};
-                    for (const orderId of orderIds.reverse()) { 
-                        const orderSnap = await getDoc(doc(db, "orders", orderId));
-                        if (orderSnap.exists()) {
-                            orderSnap.data().items.forEach(item => { if (!uniqueItems[item.id]) uniqueItems[item.id] = item; });
+                    let ordersQuery;
+
+                    if (currentUser && !currentUser.isAnonymous) {
+                        ordersQuery = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+                        const querySnapshot = await getDocs(ordersQuery);
+                        querySnapshot.forEach((doc) => {
+                            doc.data().items.forEach(item => { if (!uniqueItems[item.id]) uniqueItems[item.id] = item; });
+                        });
+                    } else {
+                        const orderIds = getOrderHistory();
+                        if (orderIds.length === 0) {
+                            reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
+                            return;
+                        }
+                        for (const orderId of orderIds.reverse()) { 
+                            const orderSnap = await getDoc(doc(db, "orders", orderId));
+                            if (orderSnap.exists()) {
+                                orderSnap.data().items.forEach(item => { if (!uniqueItems[item.id]) uniqueItems[item.id] = item; });
+                            }
                         }
                     }
+                    
                     const itemsArray = Object.values(uniqueItems);
                     if (itemsArray.length === 0) {
-                         reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Não foi possível carregar os itens dos seus pedidos anteriores.</p>';
+                         reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Nenhum item encontrado nos seus pedidos anteriores.</p>';
                          return;
                     }
                     reorderItemsList.innerHTML = itemsArray.map(item => `
@@ -437,61 +460,154 @@
                 const renderMyOrders = () => {
                     orderListeners.forEach(unsubscribe => unsubscribe());
                     orderListeners = [];
-                    const orderIds = getOrderHistory();
-                    if (orderIds.length === 0) {
-                        myOrdersList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
+                    
+                    let ordersQuery;
+                    if (currentUser && !currentUser.isAnonymous) {
+                        ordersQuery = query(collection(db, "orders"), where("userId", "==", currentUser.uid));
+                    } else {
+                        const orderIds = getOrderHistory();
+                        if (orderIds.length === 0) {
+                            myOrdersList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
+                            return;
+                        }
+                        myOrdersList.innerHTML = '';
+                        orderIds.reverse().forEach(orderId => {
+                            const orderCard = document.createElement('div');
+                            orderCard.id = `order-${orderId}`;
+                            myOrdersList.appendChild(orderCard);
+                            const unsubscribe = onSnapshot(doc(db, "orders", orderId), (docSnap) => renderOrderCard(orderCard, docSnap));
+                            orderListeners.push(unsubscribe);
+                        });
                         return;
                     }
-                    myOrdersList.innerHTML = '';
-                    orderIds.reverse().forEach(orderId => {
-                        const orderCard = document.createElement('div');
-                        orderCard.id = `order-${orderId}`;
-                        orderCard.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md';
-                        orderCard.innerHTML = '<p>A carregar pedido...</p>';
-                        myOrdersList.appendChild(orderCard);
-                        const unsubscribe = onSnapshot(doc(db, "orders", orderId), (docSnap) => {
-                            if (docSnap.exists()) {
-                                const order = docSnap.data();
-                                const statusMap = {
-                                    pending: { text: 'Pendente', color: 'bg-yellow-500' },
-                                    in_preparation: { text: 'Em Preparo', color: 'bg-blue-500' },
-                                    out_for_delivery: { text: 'Saiu para Entrega', color: 'bg-purple-500' },
-                                    completed: { text: 'Concluído', color: 'bg-green-500' },
-                                    canceled: { text: 'Cancelado', color: 'bg-red-500' },
-                                };
-                                const currentStatus = statusMap[order.status] || { text: order.status, color: 'bg-gray-500' };
-                                orderCard.innerHTML = `
-                                    <div class="flex justify-between items-start">
-                                        <div><p class="font-bold">Pedido #${docSnap.id.substring(0, 6)}</p><p class="text-sm text-gray-500 dark:text-gray-400">${new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR')}</p></div>
-                                        <div class="text-right"><p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p><span class="text-xs font-bold text-white px-2 py-1 rounded-full ${currentStatus.color}">${currentStatus.text}</span></div>
-                                    </div>
-                                    <div class="mt-2 border-t dark:border-gray-700 pt-2"><ul class="text-sm">${order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}</ul></div>
-                                `;
-                            } else {
-                                orderCard.innerHTML = `<p class="text-red-500">Pedido #${orderId.substring(0,6)} não encontrado.</p>`;
-                            }
+
+                    myOrdersList.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>';
+                    onSnapshot(ordersQuery, (snapshot) => {
+                        if (snapshot.empty) {
+                            myOrdersList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos na sua conta.</p>';
+                            return;
+                        }
+                        myOrdersList.innerHTML = '';
+                        snapshot.docs.sort((a,b) => b.data().createdAt - a.data().createdAt).forEach(docSnap => {
+                            const orderCard = document.createElement('div');
+                            orderCard.id = `order-${docSnap.id}`;
+                            myOrdersList.appendChild(orderCard);
+                            renderOrderCard(orderCard, docSnap);
                         });
-                        orderListeners.push(unsubscribe);
                     });
                 };
 
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        checkForStripeSuccess();
-                        onSnapshot(collection(db, "products"), (snapshot) => {
-                            allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                            renderCategories();
-                            renderProducts();
-                            appLoader.classList.add('hidden');
-                            appContent.classList.remove('hidden');
-                        }, (error) => {
-                            appLoader.innerHTML = `<p class="text-red-500">Não foi possível carregar os produtos.</p>`;
-                        });
+                const renderOrderCard = (element, docSnap) => {
+                    element.className = 'bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md';
+                    if (docSnap.exists()) {
+                        const order = docSnap.data();
+                        const statusMap = {
+                            pending: { text: 'Pendente', color: 'bg-yellow-500' },
+                            in_preparation: { text: 'Em Preparo', color: 'bg-blue-500' },
+                            out_for_delivery: { text: 'Saiu para Entrega', color: 'bg-purple-500' },
+                            completed: { text: 'Concluído', color: 'bg-green-500' },
+                            canceled: { text: 'Cancelado', color: 'bg-red-500' },
+                        };
+                        const currentStatus = statusMap[order.status] || { text: order.status, color: 'bg-gray-500' };
+                        element.innerHTML = `
+                            <div class="flex justify-between items-start">
+                                <div><p class="font-bold">Pedido #${docSnap.id.substring(0, 6)}</p><p class="text-sm text-gray-500 dark:text-gray-400">${new Date(order.createdAt.seconds * 1000).toLocaleString('pt-BR')}</p></div>
+                                <div class="text-right"><p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p><span class="text-xs font-bold text-white px-2 py-1 rounded-full ${currentStatus.color}">${currentStatus.text}</span></div>
+                            </div>
+                            <div class="mt-2 border-t dark:border-gray-700 pt-2"><ul class="text-sm">${order.items.map(item => `<li>${item.quantity}x ${item.name}</li>`).join('')}</ul></div>
+                        `;
+                    } else {
+                        element.innerHTML = `<p class="text-red-500">Pedido não encontrado.</p>`;
                     }
-                });
+                };
 
-                signInAnonymously(auth).catch((error) => {
-                    appLoader.innerHTML = `<p class="text-red-500">Erro ao conectar com o servidor.</p>`;
+                const renderAccountView = async () => {
+                    if (currentUser && !currentUser.isAnonymous) {
+                        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                        const userData = userDoc.exists() ? userDoc.data() : { name: 'Usuário', phone: '' };
+                        accountContent.innerHTML = `
+                            <p class="text-lg">Bem-vindo, <span class="font-bold">${userData.name}</span>!</p>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">${currentUser.email}</p>
+                            <button id="logout-btn" class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600">Sair</button>
+                        `;
+                        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+                        document.getElementById('customer-name').value = userData.name;
+                    } else {
+                        accountContent.innerHTML = `
+                            <div id="auth-forms">
+                                <form id="login-form" class="space-y-4 mb-6">
+                                    <h3 class="font-bold text-lg">Entrar na sua conta</h3>
+                                    <input type="email" id="login-email" placeholder="Email" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <input type="password" id="login-password" placeholder="Senha" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">Entrar</button>
+                                    <p id="login-error" class="text-red-500 text-sm text-center hidden"></p>
+                                </form>
+                                <hr class="my-6 dark:border-gray-700">
+                                <form id="register-form" class="space-y-4">
+                                    <h3 class="font-bold text-lg">Criar nova conta</h3>
+                                    <input type="text" id="register-name" placeholder="Nome Completo" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <input type="tel" id="register-phone" placeholder="Telefone (e.g., 11987654321)" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <input type="email" id="register-email" placeholder="Email" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <input type="password" id="register-password" placeholder="Senha (mínimo 6 caracteres)" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                    <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600">Registar</button>
+                                    <p id="register-error" class="text-red-500 text-sm text-center hidden"></p>
+                                </form>
+                            </div>
+                        `;
+                        attachAuthFormListeners();
+                    }
+                };
+
+                function attachAuthFormListeners() {
+                    const loginForm = document.getElementById('login-form');
+                    const registerForm = document.getElementById('register-form');
+                    
+                    loginForm?.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const email = document.getElementById('login-email').value;
+                        const password = document.getElementById('login-password').value;
+                        signInWithEmailAndPassword(auth, email, password).catch(err => {
+                            document.getElementById('login-error').textContent = "Email ou senha inválidos.";
+                            document.getElementById('login-error').classList.remove('hidden');
+                        });
+                    });
+
+                    registerForm?.addEventListener('submit', (e) => {
+                        e.preventDefault();
+                        const name = document.getElementById('register-name').value;
+                        const phone = document.getElementById('register-phone').value;
+                        const email = document.getElementById('register-email').value;
+                        const password = document.getElementById('register-password').value;
+
+                        createUserWithEmailAndPassword(auth, email, password)
+                            .then(userCredential => {
+                                const user = userCredential.user;
+                                return setDoc(doc(db, "users", user.uid), { name, email, phone });
+                            })
+                            .catch(err => {
+                                document.getElementById('register-error').textContent = "Erro ao registar: " + err.message;
+                                document.getElementById('register-error').classList.remove('hidden');
+                            });
+                    });
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    currentUser = user;
+                    if (user && !user.isAnonymous) {
+                        console.log("Utilizador logado:", user.uid);
+                    } else {
+                        console.log("Utilizador anónimo ou não logado.");
+                        if (!user) signInAnonymously(auth);
+                    }
+                    renderAccountView();
+                    onSnapshot(collection(db, "products"), (snapshot) => {
+                        allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        renderCategories();
+                        renderProducts();
+                        appLoader.classList.add('hidden');
+                        appContent.classList.remove('hidden');
+                    });
+                    checkForStripeSuccess();
                 });
 
                 function attachProductListeners() {
@@ -555,6 +671,7 @@
                         button.classList.add('nav-btn-active');
                         if (targetViewId === 'reorder-view') renderReorderItems();
                         if (targetViewId === 'my-orders-view') renderMyOrders();
+                        if (targetViewId === 'account-view') renderAccountView();
                     });
                 });
 
