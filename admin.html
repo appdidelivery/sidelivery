@@ -13,45 +13,14 @@
         }
         /* Estilos para a impressão */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area, #print-area * {
-                visibility: visible;
-            }
-            #print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .receipt-copy {
-                font-family: 'Courier New', Courier, monospace;
-                width: 48%; /* Duas colunas */
-                float: left;
-                margin: 1%;
-                padding: 10px;
-                border: 1px dashed #000;
-                box-sizing: border-box;
-            }
-            .receipt-header {
-                text-align: center;
-                border-bottom: 1px solid #000;
-                padding-bottom: 5px;
-                margin-bottom: 5px;
-            }
-            .receipt-items th, .receipt-items td {
-                text-align: left;
-                padding: 2px 0;
-            }
-            .receipt-items .price {
-                text-align: right;
-            }
-            .receipt-footer {
-                border-top: 1px solid #000;
-                padding-top: 5px;
-                margin-top: 5px;
-            }
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; }
+            .receipt-copy { font-family: 'Courier New', Courier, monospace; width: 48%; float: left; margin: 1%; padding: 10px; border: 1px dashed #000; box-sizing: border-box; }
+            .receipt-header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 5px; }
+            .receipt-items th, .receipt-items td { text-align: left; padding: 2px 0; }
+            .receipt-items .price { text-align: right; }
+            .receipt-footer { border-top: 1px solid #000; padding-top: 5px; margin-top: 5px; }
         }
     </style>
 </head>
@@ -90,6 +59,7 @@
                 <nav>
                     <a href="#orders" class="nav-link block py-2.5 px-4 rounded bg-gray-700">Pedidos</a>
                     <a href="#products" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Produtos</a>
+                    <a href="#categories" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Categorias</a>
                     <a href="#coupons" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Cupons</a>
                     <a href="#finance" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Financeiro</a>
                     <a href="#customers" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Clientes</a>
@@ -105,9 +75,7 @@
                     
                     <section id="orders" class="admin-section">
                         <h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2>
-                        <div id="orders-list" class="space-y-4">
-                            <p class="text-gray-500">A carregar pedidos...</p>
-                        </div>
+                        <div id="orders-list" class="space-y-4"></div>
                     </section>
 
                     <section id="products" class="admin-section hidden">
@@ -119,12 +87,7 @@
                                 <input type="text" id="product-name" placeholder="Nome do Produto" class="w-full p-2 border rounded" required>
                                 <input type="number" id="product-price" placeholder="Preço (ex: 5.50)" step="0.01" class="w-full p-2 border rounded" required>
                                 <select id="product-category" class="w-full p-2 border rounded" required>
-                                    <option value="">Selecione a Categoria</option>
-                                    <option value="Cervejas">Cervejas</option>
-                                    <option value="Destilados">Destilados</option>
-                                    <option value="Vinhos">Vinhos</option>
-                                    <option value="Sem Álcool">Sem Álcool</option>
-                                    <option value="Para Acompanhar">Para Acompanhar</option>
+                                    <option value="">A carregar categorias...</option>
                                 </select>
                                 <input type="text" id="product-image-url" placeholder="URL da Imagem" class="w-full p-2 border rounded">
                                 <div class="flex space-x-2">
@@ -133,12 +96,24 @@
                                 </div>
                             </form>
                         </div>
-
                         <div class="mt-8">
                             <h3 class="text-xl font-bold mb-4">Produtos Cadastrados</h3>
-                            <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <p class="text-gray-500">A carregar produtos...</p>
-                            </div>
+                            <div id="products-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        </div>
+                    </section>
+
+                    <section id="categories" class="admin-section hidden">
+                        <h2 class="text-2xl font-semibold mb-4">Gerir Categorias</h2>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Adicionar Nova Categoria</h3>
+                            <form id="category-form" class="flex gap-4">
+                                <input type="text" id="category-name" placeholder="Nome da Categoria" class="w-full p-2 border rounded" required>
+                                <button type="submit" class="bg-blue-500 text-white py-2 px-6 rounded hover:bg-blue-600">Adicionar</button>
+                            </form>
+                        </div>
+                        <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-4">Categorias Existentes</h3>
+                            <div id="categories-list" class="space-y-2"></div>
                         </div>
                     </section>
 
@@ -158,9 +133,7 @@
                         </div>
                         <div class="mt-8">
                             <h3 class="text-xl font-bold mb-4">Cupons Ativos</h3>
-                            <div id="coupons-list" class="space-y-2">
-                                 <p class="text-gray-500">A carregar cupons...</p>
-                            </div>
+                            <div id="coupons-list" class="space-y-2"></div>
                         </div>
                     </section>
                     
@@ -179,23 +152,7 @@
                     <section id="customers" class="admin-section hidden">
                         <h2 class="text-2xl font-semibold mb-4">Gerir Clientes</h2>
                         <div class="bg-white p-6 rounded-lg shadow-md">
-                            <h3 id="customer-form-title" class="text-xl font-bold mb-4">Adicionar Novo Cliente</h3>
-                            <form id="customer-form" class="space-y-4">
-                                <input type="hidden" id="customer-id">
-                                <input type="text" id="customer-name" placeholder="Nome do Cliente" class="w-full p-2 border rounded" required>
-                                <input type="email" id="customer-email" placeholder="Email do Cliente" class="w-full p-2 border rounded" required>
-                                <input type="tel" id="customer-phone" placeholder="Telefone do Cliente" class="w-full p-2 border rounded">
-                                <div class="flex space-x-2">
-                                    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Cliente</button>
-                                    <button type="button" id="cancel-customer-edit-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400 hidden">Cancelar Edição</button>
-                                </div>
-                            </form>
-                        </div>
-                        <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
-                            <h3 class="text-xl font-bold mb-4">Clientes Registados</h3>
-                            <div id="customers-list" class="overflow-x-auto">
-                                 <p class="text-gray-500">A carregar clientes...</p>
-                            </div>
+                             <div id="customers-list" class="overflow-x-auto"></div>
                         </div>
                     </section>
 
@@ -238,6 +195,7 @@
             const ordersCollection = collection(db, "orders");
             const couponsCollection = collection(db, "coupons");
             const usersCollection = collection(db, "users");
+            const categoriesCollection = collection(db, "categories");
             let ordersCache = [];
 
             onAuthStateChanged(auth, async (user) => {
@@ -254,6 +212,7 @@
                     listenToProducts();
                     listenToCoupons();
                     listenToCustomers();
+                    listenToCategories();
                 } else {
                     adminPanel.classList.add('hidden');
                     loginScreen.classList.remove('hidden');
@@ -288,10 +247,18 @@
             });
 
             async function addSampleDataIfNeeded() {
-                const q = query(productsCollection);
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) {
-                    console.log("Base de dados de produtos vazia. A adicionar produtos de exemplo...");
+                const catSnapshot = await getDocs(query(categoriesCollection));
+                if (catSnapshot.empty) {
+                    console.log("A adicionar categorias de exemplo...");
+                    const sampleCategories = ['Cervejas', 'Destilados', 'Vinhos', 'Sem Álcool', 'Para Acompanhar'];
+                    for (const catName of sampleCategories) {
+                        await addDoc(categoriesCollection, { name: catName });
+                    }
+                }
+
+                const prodSnapshot = await getDocs(query(productsCollection));
+                if (prodSnapshot.empty) {
+                    console.log("A adicionar produtos de exemplo...");
                     const sampleProducts = [
                         { name: 'Cerveja Brahma Duplo Malte 350ml', price: 3.79, category: 'Cervejas', imageUrl: 'https://acdn.mitiendanube.com/stores/001/335/204/products/brahma-duplo-malte-lata-350ml1-c30f8c83d63006093416239565725803-1024-1024.png' },
                         { name: 'Cerveja Skol Pilsen 350ml', price: 3.29, category: 'Cervejas', imageUrl: 'https://cdn.dooca.store/145/products/cerveja-skol-pilsen-lata-350ml_640x640+fill_ffffff.png?v=1608313937&webp=0' },
@@ -583,6 +550,57 @@
                             </tbody>
                         </table>
                     `;
+                });
+            }
+
+            const categoryForm = document.getElementById('category-form');
+            categoryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('category-name').value.trim();
+                if (name) {
+                    await addDoc(collection(db, 'categories'), { name });
+                    categoryForm.reset();
+                }
+            });
+
+            function listenToCategories() {
+                const categoriesList = document.getElementById('categories-list');
+                const productCategorySelect = document.getElementById('product-category');
+                
+                onSnapshot(query(collection(db, 'categories')), (snapshot) => {
+                    // Popula a lista de gestão de categorias
+                    if (snapshot.empty) {
+                        categoriesList.innerHTML = '<p class="text-gray-500">Nenhuma categoria criada.</p>';
+                    } else {
+                        categoriesList.innerHTML = snapshot.docs.map(doc => {
+                            const category = { id: doc.id, ...doc.data() };
+                            return `
+                                <div class="bg-gray-50 p-3 rounded-md flex justify-between items-center">
+                                    <span>${category.name}</span>
+                                    <button class="delete-category-btn text-red-500 hover:text-red-700" data-id="${category.id}"><i class="fas fa-trash"></i></button>
+                                </div>
+                            `;
+                        }).join('');
+
+                        document.querySelectorAll('.delete-category-btn').forEach(btn => {
+                            btn.addEventListener('click', async (e) => {
+                                const id = e.currentTarget.dataset.id;
+                                if (confirm('Tem a certeza que deseja eliminar esta categoria?')) {
+                                    await deleteDoc(doc(db, 'categories', id));
+                                }
+                            });
+                        });
+                    }
+
+                    // Popula o dropdown no formulário de produtos
+                    productCategorySelect.innerHTML = '<option value="">Selecione a Categoria</option>';
+                    snapshot.forEach(doc => {
+                        const category = doc.data();
+                        const option = document.createElement('option');
+                        option.value = category.name;
+                        option.textContent = category.name;
+                        productCategorySelect.appendChild(option);
+                    });
                 });
             }
 
