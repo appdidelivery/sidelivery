@@ -152,7 +152,7 @@
                                     <option value="fixed">Valor Fixo (R$)</option>
                                 </select>
                                 <input type="number" id="coupon-value-admin" placeholder="Valor" step="0.01" class="w-full p-2 border rounded" required>
-                                <button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Cupom</button>
+                                <button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar Cupom</button>
                             </form>
                         </div>
                         <div class="mt-8">
@@ -348,13 +348,20 @@
             // --- FUNÇÃO DE IMPRESSÃO ---
             window.printOrder = (orderId) => {
                 const order = ordersCache.find(o => o.id === orderId);
-                if (!order) return;
+                if (!order) {
+                    console.error("Pedido não encontrado para impressão:", orderId);
+                    return;
+                }
+
+                const subtotal = order.subtotal || order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const discount = order.discount || 0;
+                const total = order.total || (subtotal - discount);
 
                 const itemsHtml = order.items.map(item => `
                     <tr>
                         <td>${item.quantity}x</td>
                         <td>${item.name}</td>
-                        <td class="price">R$ ${(item.price * item.quantity).toFixed(2)}</td>
+                        <td class="price">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</td>
                     </tr>
                 `).join('');
 
@@ -381,9 +388,9 @@
                             <tbody>${itemsHtml}</tbody>
                         </table>
                         <div class="receipt-footer" style="font-size: 10px;">
-                            <p><strong>Subtotal:</strong> <span style="float: right;">R$ ${order.subtotal.toFixed(2)}</span></p>
-                            ${order.coupon ? `<p><strong>Desconto (${order.coupon.code}):</strong> <span style="float: right;">- R$ ${order.discount.toFixed(2)}</span></p>` : ''}
-                            <p style="font-weight: bold; font-size: 12px;"><strong>Total:</strong> <span style="float: right;">R$ ${order.total.toFixed(2)}</span></p>
+                            <p><strong>Subtotal:</strong> <span style="float: right;">R$ ${subtotal.toFixed(2).replace('.', ',')}</span></p>
+                            ${order.coupon ? `<p><strong>Desconto (${order.coupon.code}):</strong> <span style="float: right;">- R$ ${discount.toFixed(2).replace('.', ',')}</span></p>` : ''}
+                            <p style="font-weight: bold; font-size: 12px;"><strong>Total:</strong> <span style="float: right;">R$ ${total.toFixed(2).replace('.', ',')}</span></p>
                             <p><strong>Pagamento:</strong> <span style="float: right;">${order.paymentMethod === 'online' ? 'Online' : 'Na Entrega'}</span></p>
                             ${order.instructions ? `<p style="margin-top: 5px;"><strong>Obs:</strong> ${order.instructions}</p>` : ''}
                         </div>
@@ -391,7 +398,10 @@
                 `;
 
                 document.getElementById('print-content').innerHTML = receiptHtml('Via Entregador') + receiptHtml('Via Comercial');
-                window.print();
+                
+                setTimeout(() => {
+                    window.print();
+                }, 100); 
             };
 
             // --- GERENCIAMENTO DE PRODUTOS (CRUD) ---
@@ -475,16 +485,27 @@
             document.getElementById('admin-coupon-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
+                const valueInput = document.getElementById('coupon-value-admin').value;
+
+                if (!code || valueInput === '') {
+                    alert("Por favor, preencha todos os campos do cupom.");
+                    return;
+                }
+                
                 const couponData = {
                     type: document.getElementById('coupon-type-admin').value,
-                    value: parseFloat(document.getElementById('coupon-value-admin').value),
+                    value: parseFloat(valueInput),
                     active: true
                 };
-                if (!code || !couponData.value) return;
-                
-                await setDoc(doc(db, "coupons", code), couponData);
-                alert(`Cupom "${code}" guardado com sucesso!`);
-                document.getElementById('admin-coupon-form').reset();
+
+                try {
+                    await setDoc(doc(db, "coupons", code), couponData);
+                    alert(`Cupom "${code}" guardado com sucesso!`);
+                    document.getElementById('admin-coupon-form').reset();
+                } catch (error) {
+                    console.error("Erro ao guardar cupom: ", error);
+                    alert("Ocorreu um erro ao guardar o cupom. Tente novamente.");
+                }
             });
 
             function listenToCoupons() {
