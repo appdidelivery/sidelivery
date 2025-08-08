@@ -480,15 +480,27 @@
             document.getElementById('admin-coupon-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
+                const valueInput = document.getElementById('coupon-value-admin').value;
+
+                if (!code || valueInput === '') {
+                    alert("Por favor, preencha todos os campos do cupom.");
+                    return;
+                }
+                
                 const couponData = {
                     type: document.getElementById('coupon-type-admin').value,
-                    value: parseFloat(document.getElementById('coupon-value-admin').value),
+                    value: parseFloat(valueInput),
                     active: true
                 };
-                if (!code || !couponData.value) return;
-                
-                await setDoc(doc(db, "coupons", code), couponData);
-                document.getElementById('admin-coupon-form').reset();
+
+                try {
+                    await setDoc(doc(db, "coupons", code), couponData);
+                    alert(`Cupom "${code}" guardado com sucesso!`);
+                    document.getElementById('admin-coupon-form').reset();
+                } catch (error) {
+                    console.error("Erro ao guardar cupom: ", error);
+                    alert("Ocorreu um erro ao guardar o cupom. Tente novamente.");
+                }
             });
 
             function listenToCoupons() {
