@@ -83,7 +83,7 @@
 
     <div id="admin-panel" class="hidden h-screen bg-gray-200">
         <div class="flex h-full">
-            <!-- Sidebar -->
+            
             <div class="w-64 bg-gray-800 text-white p-5 flex flex-col">
                 <h1 class="text-2xl font-bold mb-10">Admin SI Delivery</h1>
                 <nav>
@@ -97,11 +97,9 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="flex-1 flex flex-col overflow-hidden">
                 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
                     
-                    <!-- Seção de Pedidos -->
                     <section id="orders" class="admin-section">
                         <h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2>
                         <div id="orders-list" class="space-y-4">
@@ -109,7 +107,6 @@
                         </div>
                     </section>
 
-                    <!-- Seção de Produtos -->
                     <section id="products" class="admin-section hidden">
                         <h2 class="text-2xl font-semibold mb-4">Gerir Produtos</h2>
                         <div class="bg-white p-6 rounded-lg shadow-md">
@@ -142,12 +139,12 @@
                         </div>
                     </section>
 
-                    <!-- Seção de Cupons -->
                     <section id="coupons" class="admin-section hidden">
                         <h2 class="text-2xl font-semibold mb-4">Gerir Cupons</h2>
                         <div class="bg-white p-6 rounded-lg shadow-md">
                             <h3 id="coupon-form-title" class="text-xl font-bold mb-4">Criar Novo Cupom</h3>
-                            <form id="coupon-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                            <!-- ID do formulário alterado para evitar conflitos -->
+                            <form id="admin-coupon-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                                 <input type="text" id="coupon-code-admin" placeholder="Código (ex: BEMVINDO10)" class="p-2 border rounded uppercase" required>
                                 <select id="coupon-type-admin" class="p-2 border rounded" required>
                                     <option value="percentage">Percentagem (%)</option>
@@ -169,7 +166,6 @@
         </div>
     </div>
 
-    <!-- Área de Impressão (escondida) -->
     <div id="print-area" class="hidden">
         <div id="print-content"></div>
     </div>
@@ -462,7 +458,8 @@
             }
 
             // --- GERENCIAMENTO DE CUPONS ---
-            document.getElementById('coupon-form').addEventListener('submit', async (e) => {
+            // Listener de formulário atualizado para usar o novo ID
+            document.getElementById('admin-coupon-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
                 const couponData = {
@@ -473,7 +470,7 @@
                 if (!code || !couponData.value) return;
                 
                 await setDoc(doc(db, "coupons", code), couponData);
-                document.getElementById('coupon-form').reset();
+                document.getElementById('admin-coupon-form').reset();
             });
 
             function listenToCoupons() {
