@@ -243,9 +243,7 @@
                     };
                     try {
                         const docRef = await addDoc(collection(db, "orders"), orderData);
-                        if (currentUser && !currentUser.isAnonymous) {
-                            saveOrderToHistory(docRef.id);
-                        }
+                        saveOrderToHistory(docRef.id);
                         checkoutForm.reset();
                         couponForm.reset();
                         cart = [];
