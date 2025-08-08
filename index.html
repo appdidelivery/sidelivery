@@ -210,7 +210,6 @@
             let currentCategory = 'Todos';
             
             // --- CHAVE DE TESTE PUBLICÁVEL DO STRIPE ---
-            // IMPORTANTE: Esta é uma chave de teste. NUNCA exponha a sua chave secreta no front-end.
             const stripe = Stripe('pk_test_51PbiUjRsyVfMFqsx1B3j3iU5BqBqWwJv8t2a6Oa3eY7g5eX6d7c8f9g0h1i2j3k4l5m6n7o8p9q0r');
 
 
@@ -386,12 +385,21 @@
                 };
 
                 const handleStripeCheckout = async () => {
-                    if (cart.length === 0 || !checkoutForm.checkValidity()) {
+                    if (cart.length === 0) {
+                        alert("O seu carrinho está vazio.");
+                        return;
+                    }
+                    if (!checkoutForm.checkValidity()) {
                         checkoutForm.reportValidity();
+                        alert("Por favor, preencha o seu nome e endereço para continuar.");
                         return;
                     }
 
-                    // Salvar informações do formulário para usar após o redirecionamento
+                    const payOnlineBtn = document.querySelector('button[data-payment="online"]');
+                    const originalBtnText = payOnlineBtn.innerHTML;
+                    payOnlineBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> A processar...`;
+                    payOnlineBtn.disabled = true;
+
                     const checkoutData = {
                         customerName: document.getElementById('customer-name').value,
                         customerAddress: document.getElementById('customer-address').value,
@@ -407,28 +415,31 @@
                             product_data: {
                                 name: item.name,
                             },
-                            unit_amount: Math.round(item.price * 100), // Preço em centavos
+                            unit_amount: Math.round(item.price * 100),
                         },
                         quantity: item.quantity,
                     }));
-                    
-                    if (appliedCoupon) {
-                        // Lógica de cupom no Stripe é complexa e requer backend.
-                        // Para esta demo, o desconto será aplicado apenas no Firestore.
-                        console.warn("Cupons não são aplicados no Stripe Checkout nesta demo.");
-                    }
 
-                    const { error } = await stripe.redirectToCheckout({
-                        lineItems: line_items,
-                        mode: 'payment',
-                        successUrl: `${window.location.origin}${window.location.pathname}?stripe_session_id={CHECKOUT_SESSION_ID}`,
-                        cancelUrl: `${window.location.origin}${window.location.pathname}`,
-                        locale: 'pt-BR'
-                    });
+                    try {
+                        const { error } = await stripe.redirectToCheckout({
+                            lineItems: line_items,
+                            mode: 'payment',
+                            successUrl: `${window.location.origin}${window.location.pathname}?stripe_session_id={CHECKOUT_SESSION_ID}`,
+                            cancelUrl: `${window.location.origin}${window.location.pathname}`,
+                            locale: 'pt-BR'
+                        });
 
-                    if (error) {
-                        console.error('Erro do Stripe:', error);
-                        alert(error.message);
+                        if (error) {
+                            console.error('Erro do Stripe:', error);
+                            alert(error.message);
+                            payOnlineBtn.innerHTML = originalBtnText;
+                            payOnlineBtn.disabled = false;
+                        }
+                    } catch (e) {
+                        console.error('Erro inesperado no checkout:', e);
+                        alert('Ocorreu um erro inesperado. Tente novamente.');
+                        payOnlineBtn.innerHTML = originalBtnText;
+                        payOnlineBtn.disabled = false;
                     }
                 };
                 
@@ -439,8 +450,6 @@
                     if (sessionId) {
                         const checkoutData = JSON.parse(localStorage.getItem('checkoutData'));
                         if (checkoutData) {
-                            // Em produção, você verificaria o status da sessão no backend.
-                            // Aqui, assumimos sucesso.
                             cart = checkoutData.cart;
                             appliedCoupon = checkoutData.appliedCoupon;
                             document.getElementById('customer-name').value = checkoutData.customerName;
@@ -450,7 +459,6 @@
                             await createOrder({ method: 'online', id: sessionId });
 
                             localStorage.removeItem('checkoutData');
-                            // Limpa o parâmetro da URL
                             window.history.replaceState({}, document.title, window.location.pathname);
                         }
                     }
