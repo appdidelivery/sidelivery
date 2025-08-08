@@ -8,7 +8,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> 
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
         .nav-link-active { background-color: #3b82f6; }
         @media print {
             body * { visibility: hidden; }
@@ -90,6 +92,7 @@
             let ordersCache = [];
             let productsCache = [];
             let categoriesCache = [];
+            let customersCache = [];
 
             onAuthStateChanged(auth, async (user) => {
                 appLoader.classList.add('hidden');
@@ -376,7 +379,7 @@
                     stock: parseInt(document.getElementById('product-stock').value),
                     category: document.getElementById('product-category').value,
                     imageUrl: document.getElementById('product-image-url').value,
-                    active: document.getElementById('product-active').checked
+                    active: document.getElementById('product-active')?.checked ?? true
                 };
                 if (id) await updateDoc(doc(db, "products", id), productData);
                 else await addDoc(productsCollection, productData);
@@ -390,7 +393,7 @@
                 document.getElementById('cancel-edit-btn').classList.add('hidden');
             }
             
-            async function editProduct(id) {
+            function editProduct(id) {
                 const product = productsCache.find(p => p.id === id);
                 if (!product) return;
                 document.getElementById('product-id').value = product.id;
@@ -399,7 +402,7 @@
                 document.getElementById('product-stock').value = product.stock;
                 document.getElementById('product-category').value = product.category;
                 document.getElementById('product-image-url').value = product.imageUrl;
-                document.getElementById('product-active').checked = product.active;
+                if(document.getElementById('product-active')) document.getElementById('product-active').checked = product.active;
                 document.getElementById('product-form-title').textContent = 'A editar Produto';
                 document.getElementById('cancel-edit-btn').classList.remove('hidden');
             }
