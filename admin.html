@@ -90,6 +90,7 @@
                     <a href="#orders" class="nav-link block py-2.5 px-4 rounded bg-gray-700">Pedidos</a>
                     <a href="#products" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Produtos</a>
                     <a href="#coupons" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Cupons</a>
+                    <a href="#finance" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700">Financeiro</a>
                 </nav>
                 <div class="mt-auto">
                     <p id="auth-info-admin" class="text-xs text-gray-400">Carregando...</p>
@@ -143,7 +144,6 @@
                         <h2 class="text-2xl font-semibold mb-4">Gerir Cupons</h2>
                         <div class="bg-white p-6 rounded-lg shadow-md">
                             <h3 id="coupon-form-title" class="text-xl font-bold mb-4">Criar Novo Cupom</h3>
-                            <!-- ID do formulário alterado para evitar conflitos -->
                             <form id="admin-coupon-form" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                                 <input type="text" id="coupon-code-admin" placeholder="Código (ex: BEMVINDO10)" class="p-2 border rounded uppercase" required>
                                 <select id="coupon-type-admin" class="p-2 border rounded" required>
@@ -161,6 +161,19 @@
                             </div>
                         </div>
                     </section>
+                    
+                    <section id="finance" class="admin-section hidden">
+                        <h2 class="text-2xl font-semibold mb-4">Financeiro e Pagamentos</h2>
+                        <div class="bg-white p-6 rounded-lg shadow-md">
+                            <h3 class="text-xl font-bold mb-2">Gestão de Pagamentos Online</h3>
+                            <p class="text-gray-600 mb-4">A gestão de todos os pagamentos online, incluindo depósitos, saldos e saques, é feita de forma segura através do seu painel da Stripe.</p>
+                            <a href="https://dashboard.stripe.com" target="_blank" class="inline-block bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+                                <i class="fa-brands fa-stripe-s mr-2"></i> Aceder ao Painel Stripe
+                            </a>
+                            <p class="text-sm text-gray-500 mt-4">No painel da Stripe, pode ver relatórios detalhados, gerir disputas e configurar as suas preferências de saque para a sua conta bancária.</p>
+                        </div>
+                    </section>
+
                 </main>
             </div>
         </div>
@@ -290,7 +303,13 @@
                     snapshot.forEach(doc => ordersCache.push({ id: doc.id, ...doc.data() }));
                     ordersCache.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
 
-                    ordersList.innerHTML = ordersCache.map(order => `
+                    ordersList.innerHTML = ordersCache.map(order => {
+                        let paymentDetails = `<p class="text-sm">Pagamento: ${order.paymentMethod === 'online' ? 'Online (Stripe)' : 'Na Entrega'}</p>`;
+                        if (order.paymentMethod === 'online' && order.stripePaymentId) {
+                            paymentDetails += `<p class="text-xs text-gray-500 truncate" title="${order.stripePaymentId}">ID: ${order.stripePaymentId}</p>`;
+                        }
+
+                        return `
                         <div class="bg-white p-4 rounded-lg shadow-md">
                             <div class="flex justify-between items-start">
                                 <div>
@@ -300,7 +319,7 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="font-bold text-lg">R$ ${order.total.toFixed(2).replace('.', ',')}</p>
-                                    <p class="text-sm">Pagamento: ${order.paymentMethod === 'online' ? 'Online' : 'Na Entrega'}</p>
+                                    ${paymentDetails}
                                 </div>
                             </div>
                              <div class="mt-2">
@@ -323,7 +342,7 @@
                                 </button>
                             </div>
                         </div>
-                    `).join('');
+                    `}).join('');
                 });
             }
 
@@ -458,7 +477,6 @@
             }
 
             // --- GERENCIAMENTO DE CUPONS ---
-            // Listener de formulário atualizado para usar o novo ID
             document.getElementById('admin-coupon-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const code = document.getElementById('coupon-code-admin').value.trim().toUpperCase();
