@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SI Delivery - Conveniência Santa Isabel</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -54,7 +55,6 @@
                         
                         <!-- Camadas de Promoção -->
                         <div class="space-y-3 mb-8">
-                            <!-- Promo 1: Cupom -->
                             <div class="bg-green-100 dark:bg-green-900/50 border-l-4 border-green-500 text-green-800 dark:text-green-200 p-4 rounded-lg flex items-center shadow-sm">
                                 <i class="fa-solid fa-tags fa-lg mr-4"></i>
                                 <div>
@@ -62,7 +62,6 @@
                                     <p class="text-sm">Use o cupom: <span class="font-mono bg-green-200 dark:bg-green-800/60 px-1 rounded">BEMVINDO10</span></p>
                                 </div>
                             </div>
-                            <!-- Promo 2: Frete -->
                             <div class="bg-blue-100 dark:bg-blue-900/50 border-l-4 border-blue-500 text-blue-800 dark:text-blue-200 p-4 rounded-lg flex items-center shadow-sm">
                                 <i class="fa-solid fa-truck-fast fa-lg mr-4"></i>
                                 <div>
@@ -93,7 +92,7 @@
                             <div class="border-t dark:border-gray-700 pt-4"><div class="flex justify-between items-center text-gray-600 dark:text-gray-300"><span>Subtotal</span><span id="cart-subtotal">R$ 0,00</span></div><div class="flex justify-between items-center text-sm text-green-600"><span>Desconto</span><span id="cart-discount">- R$ 0,00</span></div><div class="flex justify-between items-center font-bold text-lg mt-2"><span>Total</span><span id="cart-total">R$ 0,00</span></div></div>
                             <div class="mt-4"><form id="coupon-form" class="flex gap-2"><input type="text" id="coupon-code" placeholder="Código do Cupom" class="w-full p-2 border dark:border-gray-600 rounded uppercase bg-gray-100 dark:bg-gray-700"><button type="submit" class="bg-gray-800 dark:bg-gray-600 text-white px-4 rounded hover:bg-gray-900 dark:hover:bg-gray-500">Aplicar</button></form><p id="coupon-message" class="text-sm mt-2"></p></div>
                             <hr class="my-6 dark:border-gray-700">
-                            <div><h3 class="text-lg font-bold mb-4">Informações para Entrega</h3><form id="checkout-form" class="space-y-4"><input type="text" id="customer-name" placeholder="O seu Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><input type="text" id="customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><textarea id="order-instructions" placeholder="Instruções (ex: troco para 50)" class="w-full p-2 border dark:border-gray-600 rounded h-20 bg-gray-100 dark:bg-gray-700"></textarea><h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3><div class="flex gap-4"><button type="button" data-payment="delivery" class="payment-btn flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Pagar na Entrega</button><button type="button" data-payment="online" class="payment-btn flex-1 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 py-3 rounded-lg">Pagar Online</button></div></form></div>
+                            <div><h3 class="text-lg font-bold mb-4">Informações para Entrega</h3><form id="checkout-form" class="space-y-4"><input type="text" id="customer-name" placeholder="O seu Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><input type="text" id="customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required><textarea id="order-instructions" placeholder="Instruções (ex: troco para 50)" class="w-full p-2 border dark:border-gray-600 rounded h-20 bg-gray-100 dark:bg-gray-700"></textarea><h3 class="text-lg font-bold pt-4">Forma de Pagamento</h3><div class="flex gap-4"><button type="button" data-payment="delivery" class="payment-btn flex-1 bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600">Pagar na Entrega</button><button type="button" data-payment="online" class="payment-btn flex-1 bg-green-500 text-white py-3 rounded-lg hover:bg-green-600">Pagar Online</button></div></form></div>
                         </div>
                     </div>
                 </div>
@@ -206,9 +205,14 @@
             let allProducts = [];
             let cart = [];
             let appliedCoupon = null;
-            let orderListeners = []; // Para gerir listeners de status
+            let orderListeners = []; 
             let currentSearchTerm = '';
             let currentCategory = 'Todos';
+            
+            // --- CHAVE DE TESTE PUBLICÁVEL DO STRIPE ---
+            // IMPORTANTE: Esta é uma chave de teste. NUNCA exponha a sua chave secreta no front-end.
+            const stripe = Stripe('pk_test_51PbiUjRsyVfMFqsx1B3j3iU5BqBqWwJv8t2a6Oa3eY7g5eX6d7c8f9g0h1i2j3k4l5m6n7o8p9q0r');
+
 
             // --- INICIALIZAÇÃO ---
             try {
@@ -227,9 +231,11 @@
                     }
                 };
                 themeToggle.addEventListener('click', () => {
+                    console.log('Trocando tema...');
                     document.documentElement.classList.toggle('dark');
                     localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
                     updateThemeIcon();
+                    console.log('Tema atual:', localStorage.getItem('theme'));
                 });
                 updateThemeIcon();
 
@@ -264,12 +270,10 @@
                 `;
 
                 const renderProducts = () => {
-                    // Filtra por categoria
                     const categoryProducts = currentCategory === 'Todos' 
                         ? allProducts 
                         : allProducts.filter(p => p.category === currentCategory);
 
-                    // Filtra pelo termo de pesquisa
                     const searchProducts = categoryProducts.filter(p => 
                         p.name.toLowerCase().includes(currentSearchTerm.toLowerCase())
                     );
@@ -336,6 +340,122 @@
                     
                     attachCartListeners();
                 };
+
+                const createOrder = async (paymentInfo = {}) => {
+                    if (cart.length === 0) return;
+
+                    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                    let discount = 0;
+                    if (appliedCoupon) {
+                        if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
+                        else if (appliedCoupon.type === 'percentage') discount = (subtotal * appliedCoupon.value) / 100;
+                    }
+                    const total = Math.max(0, subtotal - discount);
+
+                    const orderData = {
+                        customerName: document.getElementById('customer-name').value,
+                        customerAddress: document.getElementById('customer-address').value,
+                        instructions: document.getElementById('order-instructions').value,
+                        items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+                        subtotal,
+                        discount,
+                        total,
+                        coupon: appliedCoupon ? { code: appliedCoupon.id, discount: discount } : null,
+                        paymentMethod: paymentInfo.method || 'delivery',
+                        stripePaymentId: paymentInfo.id || null,
+                        status: 'pending',
+                        createdAt: serverTimestamp()
+                    };
+
+                    try {
+                        const docRef = await addDoc(collection(db, "orders"), orderData);
+                        saveOrderToHistory(docRef.id);
+                        
+                        checkoutForm.reset();
+                        couponForm.reset();
+                        cart = [];
+                        appliedCoupon = null;
+                        couponMessageEl.textContent = '';
+                        renderCart();
+                        successModal.classList.remove('hidden');
+                        successModal.classList.add('flex');
+                    } catch (error) {
+                        console.error("Erro ao criar pedido: ", error);
+                        alert("Ocorreu um erro ao enviar o seu pedido.");
+                    }
+                };
+
+                const handleStripeCheckout = async () => {
+                    if (cart.length === 0 || !checkoutForm.checkValidity()) {
+                        checkoutForm.reportValidity();
+                        return;
+                    }
+
+                    // Salvar informações do formulário para usar após o redirecionamento
+                    const checkoutData = {
+                        customerName: document.getElementById('customer-name').value,
+                        customerAddress: document.getElementById('customer-address').value,
+                        instructions: document.getElementById('order-instructions').value,
+                        cart: cart,
+                        appliedCoupon: appliedCoupon
+                    };
+                    localStorage.setItem('checkoutData', JSON.stringify(checkoutData));
+
+                    const line_items = cart.map(item => ({
+                        price_data: {
+                            currency: 'brl',
+                            product_data: {
+                                name: item.name,
+                            },
+                            unit_amount: Math.round(item.price * 100), // Preço em centavos
+                        },
+                        quantity: item.quantity,
+                    }));
+                    
+                    if (appliedCoupon) {
+                        // Lógica de cupom no Stripe é complexa e requer backend.
+                        // Para esta demo, o desconto será aplicado apenas no Firestore.
+                        console.warn("Cupons não são aplicados no Stripe Checkout nesta demo.");
+                    }
+
+                    const { error } = await stripe.redirectToCheckout({
+                        lineItems: line_items,
+                        mode: 'payment',
+                        successUrl: `${window.location.origin}${window.location.pathname}?stripe_session_id={CHECKOUT_SESSION_ID}`,
+                        cancelUrl: `${window.location.origin}${window.location.pathname}`,
+                        locale: 'pt-BR'
+                    });
+
+                    if (error) {
+                        console.error('Erro do Stripe:', error);
+                        alert(error.message);
+                    }
+                };
+                
+                const checkForStripeSuccess = async () => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const sessionId = urlParams.get('stripe_session_id');
+
+                    if (sessionId) {
+                        const checkoutData = JSON.parse(localStorage.getItem('checkoutData'));
+                        if (checkoutData) {
+                            // Em produção, você verificaria o status da sessão no backend.
+                            // Aqui, assumimos sucesso.
+                            cart = checkoutData.cart;
+                            appliedCoupon = checkoutData.appliedCoupon;
+                            document.getElementById('customer-name').value = checkoutData.customerName;
+                            document.getElementById('customer-address').value = checkoutData.customerAddress;
+                            document.getElementById('order-instructions').value = checkoutData.instructions;
+                            
+                            await createOrder({ method: 'online', id: sessionId });
+
+                            localStorage.removeItem('checkoutData');
+                            // Limpa o parâmetro da URL
+                            window.history.replaceState({}, document.title, window.location.pathname);
+                        }
+                    }
+                };
+
 
                 // --- LÓGICA DO CARRINHO, CUPONS, PESQUISA E MODAL ---
                 const addToCart = (productId) => {
@@ -462,7 +582,7 @@
 
                     reorderItemsList.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-blue-500"></i>';
                     const uniqueItems = {};
-                    for (const orderId of orderIds.reverse()) { // Pega dos mais recentes
+                    for (const orderId of orderIds.reverse()) { 
                         const orderSnap = await getDoc(doc(db, "orders", orderId));
                         if (orderSnap.exists()) {
                             orderSnap.data().items.forEach(item => {
@@ -561,6 +681,7 @@
                 // --- LISTENERS GLOBAIS ---
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
+                        checkForStripeSuccess();
                         onSnapshot(collection(db, "products"), (snapshot) => {
                             allProducts = snapshot.docs.map(doc => {
                                 const productData = doc.data();
@@ -622,53 +743,16 @@
                 }
                 
                 document.querySelectorAll('.payment-btn').forEach(btn => {
-                    btn.addEventListener('click', async (e) => {
-                        if (cart.length === 0) {
-                            alert("O seu carrinho está vazio.");
-                            return;
-                        }
-                        
-                        if (!checkoutForm.checkValidity()) {
-                            checkoutForm.reportValidity();
-                            return;
-                        }
-
-                        const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-                        let discount = 0;
-                        if (appliedCoupon) {
-                           if (appliedCoupon.type === 'fixed') discount = appliedCoupon.value;
-                           else if (appliedCoupon.type === 'percentage') discount = (subtotal * appliedCoupon.value) / 100;
-                        }
-                        const total = Math.max(0, subtotal - discount);
-
-                        const orderData = {
-                            customerName: document.getElementById('customer-name').value,
-                            customerAddress: document.getElementById('customer-address').value,
-                            instructions: document.getElementById('order-instructions').value,
-                            items: cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
-                            subtotal,
-                            discount,
-                            total,
-                            coupon: appliedCoupon ? { code: appliedCoupon.id, discount: discount } : null,
-                            paymentMethod: e.target.dataset.payment,
-                            status: 'pending',
-                            createdAt: serverTimestamp()
-                        };
-
-                        try {
-                            const docRef = await addDoc(collection(db, "orders"), orderData);
-                            saveOrderToHistory(docRef.id);
-                            
-                            checkoutForm.reset();
-                            couponForm.reset();
-                            cart = [];
-                            appliedCoupon = null;
-                            couponMessageEl.textContent = '';
-                            renderCart();
-                            successModal.classList.remove('hidden');
-                            successModal.classList.add('flex');
-                        } catch (error) {
-                            alert("Ocorreu um erro ao enviar o seu pedido.");
+                    btn.addEventListener('click', (e) => {
+                        const paymentMethod = e.target.dataset.payment;
+                        if (paymentMethod === 'online') {
+                            handleStripeCheckout();
+                        } else {
+                            if (cart.length === 0 || !checkoutForm.checkValidity()) {
+                                checkoutForm.reportValidity();
+                                return;
+                            }
+                            createOrder();
                         }
                     });
                 });
@@ -696,11 +780,11 @@
                 });
 
             } catch (e) {
-                console.error("Erro fatal na inicialização do Firebase:", e);
-                appLoader.innerHTML = `<p class="text-red-500">Erro crítico na configuração do Firebase.</p>`;
+                console.error("Erro fatal na inicialização:", e);
+                appLoader.innerHTML = `<p class="text-red-500">Erro crítico na configuração da aplicação.</p>`;
             }
         });
     </script>
 
 </body>
-</ht
+</html>
