@@ -8,9 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style> 
-        body { 
-            font-family: 'Inter', sans-serif; 
-        }
+        body { font-family: 'Inter', sans-serif; }
         .nav-link-active { background-color: #3b82f6; }
         @media print {
             body * { visibility: hidden; }
@@ -39,6 +37,7 @@
                     <a href="#categories" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-tags mr-3"></i>Categorias</a>
                     <a href="#coupons" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-ticket mr-3"></i>Cupons</a>
                     <a href="#customers" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-users mr-3"></i>Clientes</a>
+                    <a href="#finance" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-dollar-sign mr-3"></i>Financeiro</a>
                 </nav>
                 <div class="mt-auto"><p id="auth-info-admin" class="text-xs text-gray-400">Carregando...</p><button id="logout-btn" class="w-full mt-2 text-left py-2.5 px-4 rounded hover:bg-red-500 transition-colors"><i class="fa-solid fa-right-from-bracket mr-3"></i>Sair</button></div>
             </div>
@@ -50,6 +49,7 @@
                     <section id="categories" class="admin-section hidden"></section>
                     <section id="coupons" class="admin-section hidden"></section>
                     <section id="customers" class="admin-section hidden"></section>
+                    <section id="finance" class="admin-section hidden"></section>
                 </main>
             </div>
         </div>
@@ -332,30 +332,53 @@
                 section.innerHTML = `
                     <h2 class="text-2xl font-semibold mb-4">Gerir Clientes</h2>
                     <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 id="customer-form-title" class="text-xl font-bold mb-4">Adicionar Novo Cliente</h3>
+                        <form id="customer-form" class="space-y-4">
+                            <input type="hidden" id="customer-id">
+                            <input type="text" id="customer-name" placeholder="Nome do Cliente" class="w-full p-2 border rounded" required>
+                            <input type="email" id="customer-email" placeholder="Email do Cliente" class="w-full p-2 border rounded" required>
+                            <input type="tel" id="customer-phone" placeholder="Telefone do Cliente" class="w-full p-2 border rounded">
+                            <div class="flex space-x-2">
+                                <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Cliente</button>
+                                <button type="button" id="cancel-customer-edit-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400 hidden">Cancelar Edição</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-4">Clientes Registados</h3>
                         <div id="customers-list" class="overflow-x-auto"></div>
                     </div>`;
                 
+                document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
+                document.getElementById('cancel-customer-edit-btn').addEventListener('click', resetCustomerForm);
+
                 onSnapshot(query(usersCollection), (snapshot) => {
+                    customersCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                     const listEl = document.getElementById('customers-list');
-                    if (snapshot.empty) {
+                    if (customersCache.length === 0) {
                         listEl.innerHTML = '<p class="text-gray-500">Nenhum cliente registado.</p>';
                         return;
                     }
                     listEl.innerHTML = `
                         <table class="w-full text-left">
-                            <thead class="border-b-2 border-gray-200"><tr><th class="p-3">Nome</th><th class="p-3">Email</th><th class="p-3">Telefone</th></tr></thead>
+                            <thead class="border-b-2 border-gray-200"><tr><th class="p-3">Nome</th><th class="p-3">Email</th><th class="p-3">Telefone</th><th class="p-3">Ações</th></tr></thead>
                             <tbody>
-                                ${snapshot.docs.map(doc => {
-                                    const user = doc.data();
-                                    return `<tr class="border-b border-gray-100">
-                                        <td class="p-3">${user.name || 'Não informado'}</td>
-                                        <td class="p-3">${user.email || 'Não informado'}</td>
-                                        <td class="p-3">${user.phone || 'Não informado'}</td>
-                                    </tr>`
-                                }).join('')}
+                                ${customersCache.map(user => `
+                                    <tr class="border-b border-gray-100">
+                                        <td class="p-3">${user.name || ''}</td>
+                                        <td class="p-3">${user.email || ''}</td>
+                                        <td class="p-3">${user.phone || ''}</td>
+                                        <td class="p-3">
+                                            <button class="edit-customer-btn text-blue-500 hover:text-blue-700 mr-2" data-id="${user.id}"><i class="fas fa-pen"></i></button>
+                                            <button class="delete-customer-btn text-red-500 hover:text-red-700" data-id="${user.id}"><i class="fas fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
                             </tbody>
                         </table>
                     `;
+                    document.querySelectorAll('.edit-customer-btn').forEach(btn => btn.addEventListener('click', (e) => editCustomer(e.currentTarget.dataset.id)));
+                    document.querySelectorAll('.delete-customer-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCustomer(e.currentTarget.dataset.id)));
                 });
             }
             
@@ -458,6 +481,48 @@
                     option.textContent = cat.name;
                     select.appendChild(option);
                 });
+            }
+
+            async function handleCustomerFormSubmit(e) {
+                e.preventDefault();
+                const id = document.getElementById('customer-id').value;
+                const customerData = {
+                    name: document.getElementById('customer-name').value,
+                    email: document.getElementById('customer-email').value,
+                    phone: document.getElementById('customer-phone').value,
+                };
+                if (id) {
+                    await updateDoc(doc(db, "users", id), customerData);
+                } else {
+                    // Nota: Isto cria um registo na base de dados, mas não um utilizador com senha.
+                    // A criação de utilizadores com senha deve ser feita pelo próprio utilizador no front-end.
+                    await addDoc(usersCollection, customerData);
+                }
+                resetCustomerForm();
+            }
+
+            function resetCustomerForm() {
+                document.getElementById('customer-form').reset();
+                document.getElementById('customer-id').value = '';
+                document.getElementById('customer-form-title').textContent = 'Adicionar Novo Cliente';
+                document.getElementById('cancel-customer-edit-btn').classList.add('hidden');
+            }
+
+            function editCustomer(id) {
+                const customer = customersCache.find(c => c.id === id);
+                if (!customer) return;
+                document.getElementById('customer-id').value = customer.id;
+                document.getElementById('customer-name').value = customer.name;
+                document.getElementById('customer-email').value = customer.email;
+                document.getElementById('customer-phone').value = customer.phone;
+                document.getElementById('customer-form-title').textContent = 'A editar Cliente';
+                document.getElementById('cancel-customer-edit-btn').classList.remove('hidden');
+            }
+
+            async function deleteCustomer(id) {
+                if (confirm('Tem a certeza que deseja eliminar este cliente? Esta ação não pode ser desfeita.')) {
+                    await deleteDoc(doc(db, "users", id));
+                }
             }
         });
     </script>
