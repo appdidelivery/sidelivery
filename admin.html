@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel de Admin - SI Delivery</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -56,11 +57,68 @@
     </div>
 
     <div id="print-area" class="hidden"><div id="print-content"></div></div>
+    
+    <!-- Modal de Novo Pedido -->
+    <div id="new-order-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="text-xl font-bold">Criar Novo Pedido</h3>
+                <button id="close-order-modal-btn" class="text-gray-500 hover:text-gray-800">&times;</button>
+            </div>
+            <div class="p-6 space-y-4 overflow-y-auto">
+                <!-- Dados do Cliente -->
+                <div>
+                    <h4 class="font-semibold mb-2">Dados do Cliente</h4>
+                    <select id="manual-order-customer" class="w-full p-2 border rounded mb-2">
+                        <option value="">-- Selecionar Cliente Existente --</option>
+                    </select>
+                    <input type="text" id="manual-order-name" placeholder="Nome do Cliente" class="w-full p-2 border rounded" required>
+                    <input type="text" id="manual-order-address" placeholder="Endereço de Entrega" class="w-full p-2 border rounded mt-2" required>
+                </div>
+                <!-- Adicionar Produtos -->
+                <div>
+                    <h4 class="font-semibold mb-2">Adicionar Produtos</h4>
+                    <div class="flex gap-2">
+                        <select id="manual-order-product" class="w-full p-2 border rounded"></select>
+                        <button id="manual-order-add-product-btn" class="bg-blue-500 text-white px-4 rounded hover:bg-blue-600">Adicionar</button>
+                    </div>
+                </div>
+                <!-- Itens do Pedido -->
+                <div>
+                    <h4 class="font-semibold mb-2">Itens no Pedido</h4>
+                    <div id="manual-order-items" class="space-y-2">
+                        <p class="text-gray-500 text-sm">Nenhum item adicionado.</p>
+                    </div>
+                </div>
+                <!-- Cupom e Totais -->
+                <div>
+                    <h4 class="font-semibold mb-2">Cupom de Desconto</h4>
+                    <div class="flex gap-2">
+                        <input type="text" id="manual-order-coupon" placeholder="Código do Cupom" class="w-full p-2 border rounded uppercase">
+                        <button id="manual-order-apply-coupon-btn" class="bg-gray-800 text-white px-4 rounded hover:bg-gray-900">Aplicar</button>
+                    </div>
+                     <p id="manual-order-coupon-message" class="text-sm mt-2"></p>
+                </div>
+            </div>
+            <div class="p-6 border-t bg-gray-50">
+                <div class="space-y-2 mb-4">
+                    <div class="flex justify-between"><span>Subtotal:</span> <span id="manual-order-subtotal">R$ 0,00</span></div>
+                    <div class="flex justify-between text-green-600"><span>Desconto:</span> <span id="manual-order-discount">- R$ 0,00</span></div>
+                    <div class="flex justify-between font-bold text-lg"><span>Total:</span> <span id="manual-order-total">R$ 0,00</span></div>
+                </div>
+                <div class="flex gap-4">
+                    <button id="manual-order-save-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">Salvar Pedido (Na Entrega)</button>
+                    <button id="manual-order-payment-link-btn" class="flex-1 bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Gerar Link de Pagamento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             const appLoader = document.getElementById('app-loader');
@@ -93,6 +151,8 @@
             let productsCache = [];
             let categoriesCache = [];
             let customersCache = [];
+            let manualOrderCart = [];
+            let manualOrderCoupon = null;
 
             onAuthStateChanged(auth, async (user) => {
                 appLoader.classList.add('hidden');
@@ -147,7 +207,8 @@
             // --- RENDER FUNCTIONS ---
             function renderOrders() {
                 const section = document.getElementById('orders');
-                section.innerHTML = `<h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2><div id="orders-list" class="space-y-4"></div>`;
+                section.innerHTML = `<div class="flex justify-between items-center mb-4"><h2 class="text-2xl font-semibold">Pedidos Recebidos</h2><button id="new-order-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"><i class="fa-solid fa-plus"></i>Criar Pedido Manual</button></div><div id="orders-list" class="space-y-4"></div>`;
+                document.getElementById('new-order-btn').addEventListener('click', openNewOrderModal);
                 const ordersListEl = document.getElementById('orders-list');
                 
                 onSnapshot(query(ordersCollection, orderBy("createdAt", "desc")), (snapshot) => {
@@ -494,8 +555,6 @@
                 if (id) {
                     await updateDoc(doc(db, "users", id), customerData);
                 } else {
-                    // Nota: Isto cria um registo na base de dados, mas não um utilizador com senha.
-                    // A criação de utilizadores com senha deve ser feita pelo próprio utilizador no front-end.
                     await addDoc(usersCollection, customerData);
                 }
                 resetCustomerForm();
