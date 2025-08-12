@@ -60,7 +60,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             const appLoader = document.getElementById('app-loader');
@@ -93,6 +93,7 @@
             let productsCache = [];
             let categoriesCache = [];
             let customersCache = [];
+            let manualOrderCart = [];
 
             onAuthStateChanged(auth, async (user) => {
                 appLoader.classList.add('hidden');
@@ -148,9 +149,55 @@
             // --- RENDER FUNCTIONS ---
             function renderOrders() {
                 const section = document.getElementById('orders');
-                section.innerHTML = `<h2 class="text-2xl font-semibold mb-4">Pedidos Recebidos</h2><div id="orders-list" class="space-y-4"></div>`;
+                section.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl font-semibold">Pedidos Recebidos</h2>
+                        <button id="show-manual-order-form-btn" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600"><i class="fa-solid fa-plus mr-2"></i>Criar Pedido Manualmente</button>
+                    </div>
+
+                    <div id="manual-order-container" class="hidden bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h3 class="text-xl font-bold mb-4">Novo Pedido Manual</h3>
+                        <form id="manual-order-form" class="space-y-4">
+                            <input type="text" id="manual-customer-name" placeholder="Nome do Cliente" class="w-full p-2 border rounded" required>
+                            <input type="text" id="manual-customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border rounded" required>
+                            
+                            <div class="border-t pt-4">
+                                <h4 class="font-semibold mb-2">Adicionar Produtos</h4>
+                                <div class="flex items-center gap-4">
+                                    <select id="manual-product-select" class="flex-grow p-2 border rounded"></select>
+                                    <input type="number" id="manual-product-quantity" value="1" min="1" class="w-20 p-2 border rounded">
+                                    <button type="button" id="add-product-to-manual-order-btn" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Adicionar</button>
+                                </div>
+                            </div>
+
+                            <div id="manual-order-items-list" class="space-y-2"></div>
+                            <div class="border-t pt-4 space-y-2">
+                                <div class="flex justify-between font-bold text-lg"><p>Total:</p><p id="manual-order-total">R$ 0,00</p></div>
+                                <select id="manual-payment-method" class="w-full p-2 border rounded">
+                                    <option value="delivery">Pagamento na Entrega</option>
+                                    <option value="online">Pagamento Online (Registado)</option>
+                                </select>
+                            </div>
+
+                            <div class="flex space-x-2">
+                                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Guardar Pedido</button>
+                                <button type="button" id="cancel-manual-order-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="orders-list" class="space-y-4"></div>`;
+                
                 const ordersListEl = document.getElementById('orders-list');
                 
+                document.getElementById('show-manual-order-form-btn').addEventListener('click', () => {
+                    document.getElementById('manual-order-container').classList.remove('hidden');
+                    populateManualProductDropdown();
+                });
+                document.getElementById('cancel-manual-order-btn').addEventListener('click', resetManualOrderForm);
+                document.getElementById('add-product-to-manual-order-btn').addEventListener('click', addProductToManualOrder);
+                document.getElementById('manual-order-form').addEventListener('submit', handleManualOrderSubmit);
+
                 onSnapshot(query(ordersCollection, orderBy("createdAt", "desc")), (snapshot) => {
                     if (snapshot.empty) {
                         ordersListEl.innerHTML = '<p class="text-gray-500">Nenhum pedido recebido ainda.</p>';
