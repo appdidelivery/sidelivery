@@ -94,12 +94,14 @@
             <div id="reorder-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Peça de Novo</h2><p class="text-gray-600 dark:text-gray-400 mb-6">Clique nos itens dos seus pedidos antigos para adicionar ao carrinho atual.</p><div id="reorder-items-list" class="space-y-4"></div></div>
             <div id="my-orders-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Meus Pedidos</h2><div id="my-orders-list" class="space-y-4"></div></div>
             <div id="support-view" class="view hidden p-6"><h2 class="text-2xl font-bold mb-4">Central de Ajuda</h2><div class="space-y-6"><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h3 class="font-bold text-lg mb-2">Perguntas Frequentes</h3><div class="space-y-2 text-sm"><p><strong>P: Qual o tempo de entrega?</strong><br>R: O nosso tempo médio de entrega é de 30-45 minutos.</p><p><strong>P: Quais as formas de pagamento?</strong><br>R: Aceitamos pagamento na entrega (dinheiro, cartão) e pagamento online (cartão de crédito).</p></div></div><div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h3 class="font-bold text-lg mb-2">Fale Conosco</h3><p class="text-sm">Se precisar de ajuda com um pedido, entre em contato:</p><p class="text-sm mt-2"><i class="fa-solid fa-phone mr-2"></i> (XX) XXXX-XXXX</p><p class="text-sm"><i class="fa-solid fa-envelope mr-2"></i> suporte@sidelivery.com</p></div></div></div>
+            <div id="profile-view" class="view hidden p-6"></div>
         </main>
         <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg border-t dark:border-gray-700 flex justify-around">
             <button class="nav-btn nav-btn-active flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="home-view"><i class="fa-solid fa-house text-xl"></i><span class="text-xs font-medium">Início</span></button>
             <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="reorder-view"><i class="fa-solid fa-repeat text-xl"></i><span class="text-xs font-medium">Peça de Novo</span></button>
             <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="my-orders-view"><i class="fa-solid fa-receipt text-xl"></i><span class="text-xs font-medium">Meus Pedidos</span></button>
             <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="support-view"><i class="fa-solid fa-life-ring text-xl"></i><span class="text-xs font-medium">Ajuda</span></button>
+            <button class="nav-btn flex-1 flex flex-col items-center justify-center p-3 text-gray-500 dark:text-gray-400" data-view="profile-view"><i class="fa-solid fa-user text-xl"></i><span class="text-xs font-medium">Perfil</span></button>
         </nav>
     </div>
     <div id="success-modal" class="hidden fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50"><div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-sm m-4 text-center p-8"><div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4"><i class="fa-solid fa-check fa-2x text-green-600"></i></div><h3 class="text-xl font-bold mb-2">Pedido Recebido!</h3><p class="text-gray-600 dark:text-gray-300 mb-6">O seu pedido foi enviado com sucesso.</p><button id="close-success-btn" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Fechar</button></div></div>
@@ -107,8 +109,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, serverTimestamp, doc, getDoc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             const appLoader = document.getElementById('app-loader');
@@ -134,6 +136,7 @@
             const searchBar = document.getElementById('search-bar');
             const productModal = document.getElementById('product-modal');
             const productModalContent = document.getElementById('product-modal-content');
+            const profileView = document.getElementById('profile-view');
 
             const firebaseConfig = {
                 apiKey: "AIzaSyD_LdDobMQqltW6ejDwibcyoeUoX_BoHEs",
@@ -150,16 +153,12 @@
             let orderListeners = []; 
             let currentSearchTerm = '';
             let currentCategory = 'Todos';
+            let currentUser = null;
             
-            // --- CONFIGURAÇÃO DO MERCADO PAGO ---
-            // IMPORTANTE: Use a sua Public Key de teste. NUNCA exponha o seu Access Token no front-end.
             const mercadoPagoPublicKey = "TEST-c290e299-3224-4e43-9883-933a38322606";
             const mp = new MercadoPago(mercadoPagoPublicKey);
-            // IMPORTANTE: O Access Token NUNCA deve estar no front-end em produção.
-            // Ele deve ser usado num back-end seguro (como Firebase Cloud Functions) para criar a preferência de pagamento.
-            // Para esta DEMONSTRAÇÃO, ele está aqui, mas isto é INSEGURO.
             const mercadoPagoAccessToken = "TEST-6421511295842813-081210-9b433501d5dd680218805f3d53c5521b-1913160278";
-            const developerFee = 0.05; // 5% de comissão para si
+            const developerFee = 0.05;
 
             try {
                 const app = initializeApp(firebaseConfig);
@@ -275,11 +274,12 @@
                         paymentMethod: paymentInfo.method || 'delivery',
                         mercadoPagoPaymentId: paymentInfo.id || null,
                         status: 'pending',
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp(),
+                        userId: currentUser ? currentUser.uid : null
                     };
                     try {
                         const docRef = await addDoc(collection(db, "orders"), orderData);
-                        saveOrderToHistory(docRef.id);
+                        await saveOrderToHistory(docRef.id);
                         checkoutForm.reset();
                         couponForm.reset();
                         cart = [];
@@ -454,17 +454,37 @@
                     if (e.target === productModal) closeProductModal();
                 });
 
-                const getOrderHistory = () => JSON.parse(localStorage.getItem('si_delivery_orders')) || [];
-                const saveOrderToHistory = (orderId) => {
-                    const history = getOrderHistory();
-                    if (!history.includes(orderId)) {
-                        history.push(orderId);
-                        localStorage.setItem('si_delivery_orders', JSON.stringify(history));
+                const saveOrderToHistory = async (orderId) => {
+                    if (!currentUser || currentUser.isAnonymous) {
+                        const history = JSON.parse(localStorage.getItem('si_delivery_orders_guest')) || [];
+                        if (!history.includes(orderId)) {
+                            history.push(orderId);
+                            localStorage.setItem('si_delivery_orders_guest', JSON.stringify(history));
+                        }
+                    } else {
+                        const userRef = doc(db, 'users', currentUser.uid);
+                        const userSnap = await getDoc(userRef);
+                        const userData = userSnap.data() || {};
+                        const history = userData.orderHistory || [];
+                        if (!history.includes(orderId)) {
+                            history.push(orderId);
+                            await setDoc(userRef, { ...userData, orderHistory: history }, { merge: true });
+                        }
+                    }
+                };
+
+                const getOrderHistory = async () => {
+                    if (!currentUser || currentUser.isAnonymous) {
+                        return JSON.parse(localStorage.getItem('si_delivery_orders_guest')) || [];
+                    } else {
+                        const userRef = doc(db, 'users', currentUser.uid);
+                        const userSnap = await getDoc(userRef);
+                        return userSnap.data()?.orderHistory || [];
                     }
                 };
 
                 const renderReorderItems = async () => {
-                    const orderIds = getOrderHistory();
+                    const orderIds = await getOrderHistory();
                     if (orderIds.length === 0) {
                         reorderItemsList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
                         return;
@@ -502,10 +522,10 @@
                     });
                 };
 
-                const renderMyOrders = () => {
+                const renderMyOrders = async () => {
                     orderListeners.forEach(unsubscribe => unsubscribe());
                     orderListeners = [];
-                    const orderIds = getOrderHistory();
+                    const orderIds = await getOrderHistory();
                     if (orderIds.length === 0) {
                         myOrdersList.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Ainda não há pedidos no seu histórico.</p>';
                         return;
@@ -542,27 +562,105 @@
                     });
                 };
 
+                const renderProfileView = () => {
+                    if (currentUser && !currentUser.isAnonymous) {
+                        profileView.innerHTML = `
+                            <h2 class="text-2xl font-bold mb-4">Minha Conta</h2>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                <p class="mb-2"><strong>Nome:</strong> ${currentUser.displayName || 'Não informado'}</p>
+                                <p class="mb-4"><strong>Email:</strong> ${currentUser.email}</p>
+                                <button id="logout-btn" class="w-full bg-red-500 text-white font-bold py-3 rounded-lg hover:bg-red-600">Sair</button>
+                            </div>
+                        `;
+                        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+                    } else {
+                        profileView.innerHTML = `
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <!-- Login -->
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                    <h2 class="text-2xl font-bold mb-4">Entrar</h2>
+                                    <form id="login-form" class="space-y-4">
+                                        <input type="email" id="login-email" placeholder="Email" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                        <input type="password" id="login-password" placeholder="Senha" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                        <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">Entrar</button>
+                                        <p id="login-error-msg" class="text-red-500 text-sm text-center"></p>
+                                    </form>
+                                </div>
+                                <!-- Registo -->
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                    <h2 class="text-2xl font-bold mb-4">Criar Conta</h2>
+                                    <form id="register-form" class="space-y-4">
+                                        <input type="text" id="register-name" placeholder="Nome" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                        <input type="email" id="register-email" placeholder="Email" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                        <input type="password" id="register-password" placeholder="Senha" class="w-full p-2 border dark:border-gray-600 rounded bg-gray-100 dark:bg-gray-700" required>
+                                        <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700">Registar</button>
+                                        <p id="register-error-msg" class="text-red-500 text-sm text-center"></p>
+                                    </form>
+                                </div>
+                            </div>
+                        `;
+                        document.getElementById('login-form').addEventListener('submit', handleLogin);
+                        document.getElementById('register-form').addEventListener('submit', handleRegister);
+                    }
+                };
+                
+                const handleLogin = (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    signInWithEmailAndPassword(auth, email, password)
+                        .catch(error => {
+                            document.getElementById('login-error-msg').textContent = "Email ou senha inválidos.";
+                        });
+                };
+
+                const handleRegister = (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('register-name').value;
+                    const email = document.getElementById('register-email').value;
+                    const password = document.getElementById('register-password').value;
+                    createUserWithEmailAndPassword(auth, email, password)
+                        .then(userCredential => {
+                            return updateProfile(userCredential.user, { displayName: name });
+                        })
+                        .then(() => {
+                            const user = auth.currentUser;
+                            setDoc(doc(db, 'users', user.uid), {
+                                name: user.displayName,
+                                email: user.email,
+                                createdAt: serverTimestamp()
+                            });
+                        })
+                        .catch(error => {
+                            document.getElementById('register-error-msg').textContent = "Erro ao criar conta. Tente outro email.";
+                        });
+                };
+
                 onAuthStateChanged(auth, (user) => {
                     if (user) {
-                        checkForMercadoPagoSuccess();
-                        onSnapshot(collection(db, "products"), (snapshot) => {
-                            allProducts = snapshot.docs.map(doc => {
-                                const productData = doc.data();
-                                const newImage = imageOverrides[productData.name];
-                                return { id: doc.id, ...productData, imageUrl: newImage || productData.imageUrl, description: productData.description || `Esta é uma descrição de exemplo para ${productData.name}. Beba com moderação.`, brand: productData.brand || 'Marca Exemplo', rating: productData.rating || (Math.random() * (5 - 4) + 4).toFixed(1) };
-                            });
-                            renderCategories();
-                            renderProducts();
-                            appLoader.classList.add('hidden');
-                            appContent.classList.remove('hidden');
-                        }, (error) => {
-                            appLoader.innerHTML = `<p class="text-red-500">Não foi possível carregar os produtos.</p>`;
-                        });
+                        currentUser = user;
+                        if (!user.isAnonymous) {
+                            document.getElementById('customer-name').value = user.displayName || '';
+                        }
+                    } else {
+                        currentUser = null;
+                        signInAnonymously(auth).catch(console.error);
                     }
-                });
-
-                signInAnonymously(auth).catch((error) => {
-                    appLoader.innerHTML = `<p class="text-red-500">Erro ao conectar com o servidor.</p>`;
+                    renderProfileView();
+                    checkForMercadoPagoSuccess();
+                    onSnapshot(collection(db, "products"), (snapshot) => {
+                        allProducts = snapshot.docs.map(doc => {
+                            const productData = doc.data();
+                            const newImage = imageOverrides[productData.name];
+                            return { id: doc.id, ...productData, imageUrl: newImage || productData.imageUrl, description: productData.description || `Esta é uma descrição de exemplo para ${productData.name}. Beba com moderação.`, brand: productData.brand || 'Marca Exemplo', rating: productData.rating || (Math.random() * (5 - 4) + 4).toFixed(1) };
+                        });
+                        renderCategories();
+                        renderProducts();
+                        appLoader.classList.add('hidden');
+                        appContent.classList.remove('hidden');
+                    }, (error) => {
+                        appLoader.innerHTML = `<p class="text-red-500">Não foi possível carregar os produtos.</p>`;
+                    });
                 });
 
                 function attachProductListeners() {
@@ -627,6 +725,7 @@
                         button.classList.add('nav-btn-active');
                         if (targetViewId === 'reorder-view') renderReorderItems();
                         if (targetViewId === 'my-orders-view') renderMyOrders();
+                        if(targetViewId === 'profile-view') renderProfileView();
                     });
                 });
 
