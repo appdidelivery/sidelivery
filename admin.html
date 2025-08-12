@@ -648,6 +648,93 @@
                     await deleteDoc(doc(db, "users", id));
                 }
             }
+            
+            // --- FUNÇÕES DO PEDIDO MANUAL ---
+            function populateManualProductDropdown() {
+                const select = document.getElementById('manual-product-select');
+                select.innerHTML = '<option value="">Selecione um produto</option>';
+                productsCache.forEach(prod => {
+                    const option = document.createElement('option');
+                    option.value = prod.id;
+                    option.textContent = `${prod.name} - R$ ${prod.price.toFixed(2)}`;
+                    select.appendChild(option);
+                });
+            }
+
+            function addProductToManualOrder() {
+                const productId = document.getElementById('manual-product-select').value;
+                const quantity = parseInt(document.getElementById('manual-product-quantity').value);
+                if (!productId || !quantity > 0) return;
+
+                const product = productsCache.find(p => p.id === productId);
+                if (!product) return;
+
+                const existingItem = manualOrderCart.find(item => item.id === productId);
+                if (existingItem) {
+                    existingItem.quantity += quantity;
+                } else {
+                    manualOrderCart.push({ ...product, quantity });
+                }
+                renderManualOrderCart();
+            }
+
+            function renderManualOrderCart() {
+                const listEl = document.getElementById('manual-order-items-list');
+                const totalEl = document.getElementById('manual-order-total');
+                let total = 0;
+
+                if (manualOrderCart.length === 0) {
+                    listEl.innerHTML = '';
+                } else {
+                    listEl.innerHTML = manualOrderCart.map((item, index) => {
+                        total += item.price * item.quantity;
+                        return `
+                            <div class="bg-gray-50 p-2 rounded-md flex justify-between items-center">
+                                <span>${item.quantity}x ${item.name}</span>
+                                <button type="button" class="remove-manual-item-btn text-red-500 hover:text-red-700" data-index="${index}"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
+                    }).join('');
+                    document.querySelectorAll('.remove-manual-item-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                        manualOrderCart.splice(e.currentTarget.dataset.index, 1);
+                        renderManualOrderCart();
+                    }));
+                }
+                totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+            }
+
+            function resetManualOrderForm() {
+                document.getElementById('manual-order-form').reset();
+                document.getElementById('manual-order-container').classList.add('hidden');
+                manualOrderCart = [];
+                renderManualOrderCart();
+            }
+
+            async function handleManualOrderSubmit(e) {
+                e.preventDefault();
+                if (manualOrderCart.length === 0) {
+                    alert('Adicione pelo menos um produto ao pedido.');
+                    return;
+                }
+
+                const total = manualOrderCart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                const orderData = {
+                    customerName: document.getElementById('manual-customer-name').value,
+                    customerAddress: document.getElementById('manual-customer-address').value,
+                    items: manualOrderCart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity })),
+                    subtotal: total,
+                    discount: 0,
+                    total: total,
+                    coupon: null,
+                    paymentMethod: document.getElementById('manual-payment-method').value,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                };
+
+                await addDoc(ordersCollection, orderData);
+                alert('Pedido manual criado com sucesso!');
+                resetManualOrderForm();
+            }
         });
     </script>
 </body>
