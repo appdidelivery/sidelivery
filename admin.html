@@ -142,6 +142,7 @@
                 renderCoupons();
                 renderCategories();
                 renderCustomers();
+                renderFinance();
             }
 
             // --- RENDER FUNCTIONS ---
@@ -259,7 +260,7 @@
                                 <option value="fixed">Valor Fixo (R$)</option>
                             </select>
                             <input type="number" id="coupon-value-admin" placeholder="Valor" step="0.01" class="w-full p-2 border rounded" required>
-                            <button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Salvar Cupom</button>
+                            <button type="submit" class="md:col-span-3 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Guardar Cupom</button>
                         </form>
                     </div>
                     <div class="mt-8">
@@ -381,17 +382,94 @@
                     document.querySelectorAll('.delete-customer-btn').forEach(btn => btn.addEventListener('click', (e) => deleteCustomer(e.currentTarget.dataset.id)));
                 });
             }
+
+            function renderFinance() {
+                const section = document.getElementById('finance');
+                section.innerHTML = `
+                    <h2 class="text-2xl font-semibold mb-4">Financeiro e Pagamentos</h2>
+                    <div class="bg-white p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-bold mb-2">Gestão de Pagamentos Online</h3>
+                        <p class="text-gray-600 mb-4">A gestão de todos os pagamentos online, incluindo depósitos, saldos e saques, é feita de forma segura através do seu painel da Stripe.</p>
+                        <a href="https://dashboard.stripe.com" target="_blank" class="inline-block bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition-colors">
+                            <i class="fa-brands fa-stripe-s mr-2"></i> Aceder ao Painel Stripe
+                        </a>
+                        <p class="text-sm text-gray-500 mt-4">No painel da Stripe, pode ver relatórios detalhados, gerir disputas e configurar as suas preferências de saque para a sua conta bancária.</p>
+                    </div>`;
+            }
             
             // --- FUNÇÕES DE LÓGICA ---
-            window.updateOrderStatus = async (orderId, newStatus) => await updateDoc(doc(db, "orders", orderId), { status: newStatus });
-            window.printOrder = (orderId) => {
+            async function updateOrderStatus(orderId, newStatus) {
+                await updateDoc(doc(db, "orders", orderId), { status: newStatus });
+            }
+
+            function printOrder(orderId) {
                 const order = ordersCache.find(o => o.id === orderId);
-                if (!order) return;
-                const itemsHtml = order.items.map(item => `<tr><td>${item.quantity}x</td><td>${item.name}</td><td class="price">R$ ${(item.price * item.quantity).toFixed(2)}</td></tr>`).join('');
-                const receiptHtml = (title) => `<div class="receipt-copy"><div class="receipt-header"><h3 style="font-size: 16px; font-weight: bold;">SI Delivery</h3><p style="font-size: 10px;">Pedido #${order.id.substring(0, 6)}</p><p style="font-size: 10px;">${order.createdAt.toDate().toLocaleString('pt-BR')}</p><h4 style="font-size: 12px; font-weight: bold; margin-top: 5px;">${title}</h4></div><div style="font-size: 10px; margin-bottom: 5px;"><p><strong>Cliente:</strong> ${order.customerName}</p><p><strong>Endereço:</strong> ${order.customerAddress}</p></div><table class="receipt-items" style="width: 100%; font-size: 10px;"><thead><tr><th style="width: 15%;">Qtd</th><th>Item</th><th class="price">Valor</th></tr></thead><tbody>${itemsHtml}</tbody></table><div class="receipt-footer" style="font-size: 10px;"><p><strong>Subtotal:</strong> <span style="float: right;">R$ ${order.subtotal.toFixed(2)}</span></p>${order.coupon ? `<p><strong>Desconto (${order.coupon.code}):</strong> <span style="float: right;">- R$ ${order.discount.toFixed(2)}</span></p>` : ''}<p style="font-weight: bold; font-size: 12px;"><strong>Total:</strong> <span style="float: right;">R$ ${order.total.toFixed(2)}</span></p><p><strong>Pagamento:</strong> <span style="float: right;">${order.paymentMethod === 'online' ? 'Online' : 'Na Entrega'}</span></p>${order.instructions ? `<p style="margin-top: 5px;"><strong>Obs:</strong> ${order.instructions}</p>` : ''}</div></div>`;
-                document.getElementById('print-content').innerHTML = receiptHtml('Via Entregador') + receiptHtml('Via Comercial');
-                setTimeout(() => window.print(), 100); 
-            };
+                if (!order) {
+                    console.error("Pedido não encontrado no cache:", orderId);
+                    return;
+                }
+
+                const customerName = order.customerName || 'N/A';
+                const customerAddress = order.customerAddress || 'N/A';
+                const orderIdShort = order.id ? order.id.substring(0, 6) : 'N/A';
+                const createdAt = order.createdAt ? order.createdAt.toDate().toLocaleString('pt-BR') : 'N/A';
+                const subtotal = (order.subtotal || 0).toFixed(2).replace('.', ',');
+                const total = (order.total || 0).toFixed(2).replace('.', ',');
+                const paymentMethod = order.paymentMethod === 'online' ? 'Online' : 'Na Entrega';
+                const instructions = order.instructions || '';
+
+                const itemsHtml = (order.items || []).map(item => `
+                    <tr>
+                        <td>${item.quantity || 0}x</td>
+                        <td>${item.name || 'Produto desconhecido'}</td>
+                        <td class="price">R$ ${((item.price || 0) * (item.quantity || 0)).toFixed(2).replace('.', ',')}</td>
+                    </tr>
+                `).join('');
+
+                const couponHtml = order.coupon && order.discount ? 
+                    `<p><strong>Desconto (${order.coupon.code}):</strong> <span style="float: right;">- R$ ${(order.discount).toFixed(2).replace('.', ',')}</span></p>` : '';
+
+                const instructionsHtml = instructions ? 
+                    `<p style="margin-top: 5px;"><strong>Obs:</strong> ${instructions}</p>` : '';
+
+                const receiptHtml = (title) => `
+                    <div class="receipt-copy">
+                        <div class="receipt-header">
+                            <h3 style="font-size: 16px; font-weight: bold;">SI Delivery</h3>
+                            <p style="font-size: 10px;">Pedido #${orderIdShort}</p>
+                            <p style="font-size: 10px;">${createdAt}</p>
+                            <h4 style="font-size: 12px; font-weight: bold; margin-top: 5px;">${title}</h4>
+                        </div>
+                        <div style="font-size: 10px; margin-bottom: 5px;">
+                            <p><strong>Cliente:</strong> ${customerName}</p>
+                            <p><strong>Endereço:</strong> ${customerAddress}</p>
+                        </div>
+                        <table class="receipt-items" style="width: 100%; font-size: 10px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Qtd</th>
+                                    <th>Item</th>
+                                    <th class="price">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itemsHtml}</tbody>
+                        </table>
+                        <div class="receipt-footer" style="font-size: 10px;">
+                            <p><strong>Subtotal:</strong> <span style="float: right;">R$ ${subtotal}</span></p>
+                            ${couponHtml}
+                            <p style="font-weight: bold; font-size: 12px;"><strong>Total:</strong> <span style="float: right;">R$ ${total}</span></p>
+                            <p><strong>Pagamento:</strong> <span style="float: right;">${paymentMethod}</span></p>
+                            ${instructionsHtml}
+                        </div>
+                    </div>
+                `;
+
+                const printContentEl = document.getElementById('print-content');
+                if (printContentEl) {
+                    printContentEl.innerHTML = receiptHtml('Via Entregador') + receiptHtml('Via Vendas');
+                    setTimeout(() => window.print(), 250);
+                }
+            }
             
             async function handleProductFormSubmit(e) {
                 e.preventDefault();
@@ -494,8 +572,6 @@
                 if (id) {
                     await updateDoc(doc(db, "users", id), customerData);
                 } else {
-                    // Nota: Isto cria um registo na base de dados, mas não um utilizador com senha.
-                    // A criação de utilizadores com senha deve ser feita pelo próprio utilizador no front-end.
                     await addDoc(usersCollection, customerData);
                 }
                 resetCustomerForm();
