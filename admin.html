@@ -278,8 +278,9 @@
                     </div>
 
                     <div id="manual-order-container" class="hidden bg-white p-6 rounded-lg shadow-md mb-6">
-                        <h3 class="text-xl font-bold mb-4">Novo Pedido Manual</h3>
+                        <h3 id="manual-order-form-title" class="text-xl font-bold mb-4">Novo Pedido Manual</h3>
                         <form id="manual-order-form" class="space-y-4">
+                            <input type="hidden" id="manual-order-id">
                             <input type="text" id="manual-customer-name" placeholder="Nome do Cliente" class="w-full p-2 border rounded" required>
                             <input type="text" id="manual-customer-address" placeholder="Endereço de Entrega" class="w-full p-2 border rounded" required>
                             
@@ -302,7 +303,7 @@
                             </div>
 
                             <div class="flex space-x-2">
-                                <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Guardar Pedido</button>
+                                <button type="submit" id="manual-order-submit-btn" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600">Guardar Pedido</button>
                                 <button type="button" id="cancel-manual-order-btn" class="w-full bg-gray-300 py-2 rounded hover:bg-gray-400">Cancelar</button>
                             </div>
                         </form>
@@ -352,10 +353,16 @@
                                     <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Concluído</option>
                                     <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>Cancelado</option>
                                 </select>
+                                <div>
+                                    <button class="edit-order-btn text-blue-500 hover:text-blue-700 mr-4" data-id="${order.id}"><i class="fas fa-pen"></i> Editar</button>
+                                    <button class="delete-order-btn text-red-500 hover:text-red-700" data-id="${order.id}"><i class="fas fa-trash"></i> Remover</button>
+                                </div>
                             </div>
                         </div>
                     `).join('');
                     document.querySelectorAll('.order-status-select').forEach(el => el.addEventListener('change', (e) => updateOrderStatus(e.target.dataset.id, e.target.value)));
+                    document.querySelectorAll('.edit-order-btn').forEach(el => el.addEventListener('click', (e) => editOrder(e.currentTarget.dataset.id)));
+                    document.querySelectorAll('.delete-order-btn').forEach(el => el.addEventListener('click', (e) => deleteOrder(e.currentTarget.dataset.id)));
                 });
             }
             
@@ -763,6 +770,7 @@
 
             async function handleManualOrderSubmit(e) {
                 e.preventDefault();
+                const orderId = document.getElementById('manual-order-id').value;
                 if (manualOrderCart.length === 0) {
                     alert('Adicione pelo menos um produto ao pedido.');
                     return;
@@ -782,9 +790,39 @@
                     createdAt: serverTimestamp()
                 };
 
-                await addDoc(ordersCollection, orderData);
-                alert('Pedido manual criado com sucesso!');
+                if (orderId) {
+                    await updateDoc(doc(db, "orders", orderId), orderData);
+                    alert('Pedido atualizado com sucesso!');
+                } else {
+                    await addDoc(ordersCollection, orderData);
+                    alert('Pedido manual criado com sucesso!');
+                }
                 resetManualOrderForm();
+            }
+
+            function editOrder(orderId) {
+                const order = ordersCache.find(o => o.id === orderId);
+                if (!order) return;
+
+                const container = document.getElementById('manual-order-container');
+                container.classList.remove('hidden');
+                
+                document.getElementById('manual-order-form-title').textContent = "Editar Pedido";
+                document.getElementById('manual-order-submit-btn').textContent = "Guardar Alterações";
+                document.getElementById('manual-order-id').value = order.id;
+                document.getElementById('manual-customer-name').value = order.customerName;
+                document.getElementById('manual-customer-address').value = order.customerAddress;
+                document.getElementById('manual-payment-method').value = order.paymentMethod;
+                
+                manualOrderCart = [...order.items];
+                renderManualOrderCart();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            async function deleteOrder(orderId) {
+                if (confirm('Tem a certeza que deseja remover este pedido permanentemente?')) {
+                    await deleteDoc(doc(db, "orders", orderId));
+                }
             }
         });
     </script>
