@@ -105,6 +105,7 @@
                     loginScreen.classList.add('hidden');
                     loginScreen.classList.remove('flex');
                     
+                    await addSampleDataIfNeeded();
                     initializeListeners();
                 } else {
                     adminPanel.classList.add('hidden');
