@@ -32,7 +32,8 @@
             <div class="w-64 bg-gray-800 text-white p-5 flex flex-col">
                 <h1 class="text-2xl font-bold mb-10">Admin SI Delivery</h1>
                 <nav>
-                    <a href="#orders" class="nav-link block py-2.5 px-4 rounded nav-link-active"><i class="fa-solid fa-receipt mr-3"></i>Pedidos</a>
+                    <a href="#dashboard" class="nav-link block py-2.5 px-4 rounded nav-link-active"><i class="fa-solid fa-chart-line mr-3"></i>Dashboard</a>
+                    <a href="#orders" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-receipt mr-3"></i>Pedidos</a>
                     <a href="#products" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-box-archive mr-3"></i>Produtos</a>
                     <a href="#categories" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-tags mr-3"></i>Categorias</a>
                     <a href="#coupons" class="nav-link block py-2.5 px-4 rounded hover:bg-gray-700"><i class="fa-solid fa-ticket mr-3"></i>Cupons</a>
@@ -44,7 +45,8 @@
 
             <div class="flex-1 flex flex-col overflow-hidden">
                 <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
-                    <section id="orders" class="admin-section"></section>
+                    <section id="dashboard" class="admin-section"></section>
+                    <section id="orders" class="admin-section hidden"></section>
                     <section id="products" class="admin-section hidden"></section>
                     <section id="categories" class="admin-section hidden"></section>
                     <section id="coupons" class="admin-section hidden"></section>
@@ -60,7 +62,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, getDocs, setDoc, orderBy, serverTimestamp, where, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         document.addEventListener('DOMContentLoaded', () => {
             const appLoader = document.getElementById('app-loader');
@@ -138,6 +140,7 @@
             });
             
             function initializeListeners() {
+                renderDashboard();
                 renderOrders();
                 renderProducts();
                 renderCoupons();
@@ -147,6 +150,70 @@
             }
 
             // --- RENDER FUNCTIONS ---
+             function renderDashboard() {
+                const section = document.getElementById('dashboard');
+                section.innerHTML = `
+                    <h2 class="text-2xl font-semibold mb-4">Dashboard</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <!-- Card: Pedidos Hoje -->
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fa-solid fa-receipt text-3xl text-blue-500 bg-blue-100 p-4 rounded-full"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Pedidos Hoje</p>
+                                <p id="today-orders-count" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                        <!-- Card: Faturamento Hoje -->
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fa-solid fa-hand-holding-dollar text-3xl text-green-500 bg-green-100 p-4 rounded-full"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Faturação Hoje</p>
+                                <p id="today-revenue" class="text-2xl font-bold">R$ 0,00</p>
+                            </div>
+                        </div>
+                        <!-- Card: Total de Clientes -->
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fa-solid fa-users text-3xl text-yellow-500 bg-yellow-100 p-4 rounded-full"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Total de Clientes</p>
+                                <p id="total-customers" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                        <!-- Card: Total de Produtos -->
+                        <div class="bg-white p-6 rounded-lg shadow-md flex items-center">
+                            <i class="fa-solid fa-box-archive text-3xl text-purple-500 bg-purple-100 p-4 rounded-full"></i>
+                            <div class="ml-4">
+                                <p class="text-gray-500">Total de Produtos</p>
+                                <p id="total-products" class="text-2xl font-bold">0</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Listener para estatísticas de pedidos e faturamento
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const startOfToday = Timestamp.fromDate(today);
+
+                onSnapshot(query(ordersCollection, where("createdAt", ">=", startOfToday)), (snapshot) => {
+                    let ordersCount = 0;
+                    let totalRevenue = 0;
+                    snapshot.forEach(doc => {
+                        ordersCount++;
+                        totalRevenue += doc.data().total;
+                    });
+                    document.getElementById('today-orders-count').textContent = ordersCount;
+                    document.getElementById('today-revenue').textContent = `R$ ${totalRevenue.toFixed(2).replace('.', ',')}`;
+                });
+            }
+
+            function updateDashboardCounts() {
+                const totalCustomersEl = document.getElementById('total-customers');
+                const totalProductsEl = document.getElementById('total-products');
+                if (totalCustomersEl) totalCustomersEl.textContent = customersCache.length;
+                if (totalProductsEl) totalProductsEl.textContent = productsCache.length;
+            }
+
             function renderOrders() {
                 const section = document.getElementById('orders');
                 section.innerHTML = `
@@ -230,14 +297,10 @@
                                     <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Concluído</option>
                                     <option value="canceled" ${order.status === 'canceled' ? 'selected' : ''}>Cancelado</option>
                                 </select>
-                                <button class="print-order-btn bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 flex items-center gap-2" data-id="${order.id}">
-                                    <i class="fa-solid fa-print"></i> Imprimir
-                                </button>
                             </div>
                         </div>
                     `).join('');
                     document.querySelectorAll('.order-status-select').forEach(el => el.addEventListener('change', (e) => updateOrderStatus(e.target.dataset.id, e.target.value)));
-                    document.querySelectorAll('.print-order-btn').forEach(el => el.addEventListener('click', (e) => printOrder(e.currentTarget.dataset.id)));
                 });
             }
             
@@ -271,6 +334,7 @@
 
                 onSnapshot(query(productsCollection), (snapshot) => {
                     productsCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateDashboardCounts();
                     const listEl = document.getElementById('products-list');
                     if (snapshot.empty) {
                         listEl.innerHTML = '<p class="text-gray-500">Nenhum produto cadastrado.</p>';
@@ -402,6 +466,7 @@
 
                 onSnapshot(query(usersCollection), (snapshot) => {
                     customersCache = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    updateDashboardCounts();
                     const listEl = document.getElementById('customers-list');
                     if (customersCache.length === 0) {
                         listEl.innerHTML = '<p class="text-gray-500">Nenhum cliente registado.</p>';
